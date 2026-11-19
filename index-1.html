@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>GFS Catalog Studio</title>
+<style>
+:root{--green:#128C4A;--pink:#f7d7e8;--ink:#111827;--muted:#667085;--line:#e5e7eb;--bg:#fff;--soft:#faf7f9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Arial,Helvetica,sans-serif}
+button,input,textarea,select{font:inherit}button{cursor:pointer}a{color:var(--green)}
+header{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:5}
+.head{max-width:1150px;margin:auto;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:900;font-size:21px;letter-spacing:.3px}.sub{color:var(--muted);font-size:13px}
+.wrap{max-width:1150px;margin:auto;padding:20px}
+h1{font-size:29px;line-height:1.15;margin:10px 0 8px}h2{font-size:21px;margin:0 0 12px}h3{font-size:17px;margin:0 0 8px}
+.muted{color:var(--muted)}.tiny{font-size:12px}.panel{border:1px solid var(--line);border-radius:14px;padding:17px;margin:16px 0;background:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+label{display:block;font-weight:700;margin:11px 0 5px}
+input,textarea,select{width:100%;padding:11px;border:1px solid #cfd4dc;border-radius:9px;background:#fff;color:var(--ink)}
+textarea{min-height:75px;resize:vertical}
+.btn{border:0;border-radius:9px;padding:11px 15px;font-weight:800}.green{background:var(--green);color:white}.plain{background:#f3f4f6;color:var(--ink);border:1px solid var(--line)}.pink{background:var(--pink);color:#6d2549}.danger{background:#fff1f2;color:#b42318;border:1px solid #fecdd3}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.hidden{display:none!important}
+.notice{padding:12px;border-radius:9px;background:#f8fafc;border:1px solid var(--line);margin:12px 0}
+.msg{margin:8px 0;min-height:20px;font-size:14px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font-weight:700}.tab.active{background:var(--pink);border-color:#efbad5}
+.card{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}.card-body{padding:13px}
+.product-img{width:100%;height:205px;object-fit:cover;background:#f3f4f6;display:block}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.price{font-weight:900;font-size:19px}.code{font-size:13px;color:var(--muted);margin:4px 0 10px}
+.order{display:block;text-align:center;text-decoration:none;background:var(--green);color:#fff;padding:11px;border-radius:8px;font-weight:800;margin-top:8px}
+.secondary-link{display:block;text-align:center;padding:9px;border:1px solid var(--line);border-radius:8px;text-decoration:none;margin-top:8px;color:var(--ink);font-weight:700}
+.logo{max-width:85px;max-height:70px;object-fit:contain}.cover{width:100%;max-height:210px;object-fit:cover;border-radius:12px;margin-top:12px}
+.empty{padding:26px;text-align:center;border:1px dashed #cbd5e1;border-radius:12px;color:var(--muted)}
+.thumb-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.file-box{border:1px dashed #cbd5e1;padding:10px;border-radius:10px;background:#fcfcfd}
+.status{display:inline-block;padding:4px 9px;border-radius:999px;background:#f3f4f6;font-size:12px;font-weight:800}
+footer{text-align:center;color:var(--muted);padding:28px 10px;font-size:13px}
+@media(max-width:600px){.wrap{padding:13px}.head{padding:12px}.brand{font-size:18px}h1{font-size:25px}.panel{padding:13px}}
+</style>
+</head>
+<body>
+<header><div class="head"><div><div class="brand">GFS CATALOG STUDIO</div><div class="sub">Professional product catalogues</div></div><div class="row"><span id="userLabel" class="tiny muted"></span><button id="topSignOut" class="btn plain hidden" type="button">Sign out</button></div></div></header>
+<main class="wrap">
+<section id="loading" class="notice">Loading GFS Catalog Studio…</section>
+<section id="setup" class="panel hidden"><h2>Connection problem</h2><p id="setupMsg" class="muted">The app could not connect. Please check the Supabase configuration.</p></section>
+<section id="login" class="panel hidden">
+<h1>Sign in</h1><p class="muted">Sign in to your GFS Catalog Studio account.</p>
+<form id="loginForm"><label>Email address</label><input id="email" type="email" required autocomplete="username"><label>Password</label><input id="password" type="password" required autocomplete="current-password"><div class="row" style="margin-top:15px"><button class="btn green" type="submit">Sign in</button></div></form><p id="loginMsg" class="msg"></p>
+</section>
+
+<section id="owner" class="hidden">
+<div class="row between"><div><h1>Owner dashboard</h1><p class="muted">Manage businesses, products, workers and catalogue publishing.</p></div><span class="status">OWNER</span></div>
+<div class="tabs"><button class="tab active" data-tab="businessTab">Businesses</button><button class="tab" data-tab="productsTab">Products</button><button class="tab" data-tab="workersTab">Workers</button><button class="tab" data-tab="jobsTab">Work assignments</button></div>
+
+<div id="businessTab" class="tab-pane">
+<div class="panel"><h2>Create a business catalogue</h2>
+<form id="businessForm">
+<div class="grid"><div><label>Business name *</label><input id="businessName" required placeholder="e.g. Queen Beauty Store"></div><div><label>Catalogue link name *</label><input id="businessSlug" required placeholder="e.g. queen-beauty"></div><div><label>WhatsApp number *</label><input id="businessWhatsapp" required placeholder="2348012345678"></div><div><label>Instagram link</label><input id="businessInstagram" type="url" placeholder="https://instagram.com/yourstore"></div></div>
+<label>Business description</label><textarea id="businessDescription" placeholder="Introduce this business"></textarea>
+<div class="grid"><div><label>Logo image URL (optional)</label><input id="businessLogo" type="url" placeholder="https://…"></div><div><label>Cover image URL (optional)</label><input id="businessCover" type="url" placeholder="https://…"></div></div>
+<div class="row" style="margin-top:14px"><button class="btn green" type="submit">Create catalogue</button></div></form><p id="businessMsg" class="msg"></p></div>
+<div class="panel"><div class="row between"><h2>Your businesses</h2><button id="refreshBusinesses" class="btn plain" type="button">Refresh</button></div><div id="businessList" class="empty">Loading businesses…</div></div>
+</div>
+
+<div id="productsTab" class="tab-pane hidden">
+<div class="panel"><h2>Add a product</h2><p class="muted tiny">Choose up to three photos from your phone gallery. The first photo is the main product image.</p>
+<form id="productForm">
+<label>Choose business *</label><select id="productBusiness" required><option value="">Choose a business</option></select>
+<div class="grid"><div><label>Product name *</label><input id="productName" required placeholder="e.g. Vitamin C Serum"></div><div><label>Product code *</label><input id="productCode" required placeholder="e.g. QZ01"></div><div><label>Price (numbers only) *</label><input id="productPrice" type="number" min="0" step="0.01" required placeholder="12000"></div></div>
+<label>Product description</label><textarea id="productDescription" placeholder="Optional product details"></textarea>
+<div class="grid"><div class="file-box"><label>Product photo 1 *</label><input id="image1" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required></div><div class="file-box"><label>Product photo 2 (optional)</label><input id="image2" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div><div class="file-box"><label>Product photo 3 (optional)</label><input id="image3" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div></div>
+<div class="row" style="margin-top:14px"><button class="btn green" type="submit">Upload photos and add product</button></div></form><p id="productMsg" class="msg"></p></div>
+<div class="panel"><div class="row between"><h2>Product manager</h2><button id="refreshProducts" class="btn plain" type="button">Refresh</button></div><div id="productManager" class="empty">Choose a business to view its products.</div></div>
+</div>
+
+<div id="workersTab" class="tab-pane hidden">
+<div class="panel"><h2>Invite a worker</h2><p class="muted">Enter the worker’s email address. Supabase will send an invitation email so they can set up their account.</p>
+<form id="workerForm"><div class="grid"><div><label>Worker name</label><input id="workerName" placeholder="Worker's name"></div><div><label>Worker email *</label><input id="workerEmail" type="email" required placeholder="worker@example.com"></div></div><div class="row" style="margin-top:14px"><button class="btn green" type="submit">Send worker invitation</button></div></form><p id="workerMsg" class="msg"></p></div>
+<div class="panel"><div class="row between"><h2>Worker accounts</h2><button id="refreshWorkers" class="btn plain" type="button">Refresh</button></div><div id="workerList" class="empty">Loading workers…</div></div>
+</div>
+
+<div id="jobsTab" class="tab-pane hidden">
+<div class="panel"><h2>Assign catalogue work</h2><form id="jobForm"><div class="grid"><div><label>Business *</label><select id="jobBusiness" required><option value="">Choose business</option></select></div><div><label>Assign to worker *</label><select id="jobWorker" required><option value="">Choose worker</option></select></div></div><label>Instructions</label><textarea id="jobInstructions" placeholder="Describe the work this worker should complete"></textarea><div class="row" style="margin-top:14px"><button class="btn green" type="submit">Assign work</button></div></form><p id="jobMsg" class="msg"></p></div>
+<div class="panel"><div class="row between"><h2>Work assignments</h2><button id="refreshJobs" class="btn plain" type="button">Refresh</button></div><div id="jobList" class="empty">Loading assignments…</div></div>
+</div>
+</section>
+
+<section id="worker" class="hidden">
+<div class="row between"><div><h1>Worker dashboard</h1><p class="muted">View your assigned catalogue work and update its progress.</p></div><span class="status">WORKER</span></div>
+<div class="panel"><h2>Your assignments</h2><div id="workerJobs" class="empty">Loading your assignments…</div></div>
+<div class="panel"><h2>Add products to an assigned catalogue</h2><p class="muted tiny">You can add products only to businesses assigned to you by the GFS owner.</p>
+<form id="workerProductForm"><label>Assigned business *</label><select id="workerProductBusiness" required><option value="">Choose an assigned business</option></select>
+<div class="grid"><div><label>Product name *</label><input id="workerProductName" required></div><div><label>Product code *</label><input id="workerProductCode" required></div><div><label>Price *</label><input id="workerProductPrice" type="number" min="0" step="0.01" required></div></div>
+<label>Description</label><textarea id="workerProductDescription"></textarea>
+<div class="grid"><div class="file-box"><label>Product photo 1 *</label><input id="workerImage1" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required></div><div class="file-box"><label>Product photo 2</label><input id="workerImage2" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div><div class="file-box"><label>Product photo 3</label><input id="workerImage3" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div></div>
+<div class="row" style="margin-top:14px"><button class="btn green" type="submit">Upload and add product</button></div></form><p id="workerProductMsg" class="msg"></p></div>
+</section>
+
+<section id="catalogue" class="hidden">
+<div id="catalogueHeader" class="panel"></div>
+<div id="productDetail" class="panel hidden"></div>
+<div id="catalogueListWrap"><div class="row between"><h2>Products</h2><span id="productCount" class="muted"></span></div><div id="catalogueProducts" class="product-grid"></div></div>
+</section>
+</main>
+<footer>GFS Catalog Studio</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://afqouvmzzmvtpnowvlbr.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_QEgvd_gidrKKx9GvVZrlCQ_vG282Mdr";
+const BUCKET="gfs-catalog-assets";
+const $=id=>document.getElementById(id);
+const show=id=>$(id).classList.remove("hidden");
+const hide=id=>$(id).classList.add("hidden");
+const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const slugify=s=>String(s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const publicUrl=slug=>location.origin+location.pathname+"?store="+encodeURIComponent(slug);
+const waUrl=(number,text)=>"https://wa.me/"+String(number||"").replace(/\D/g,"")+"?text="+encodeURIComponent(text);
+let db=null,currentUser=null,profile=null,businesses=[],workers=[],workerJobs=[];
+
+function msg(id,text,error=false){$(id).textContent=text;$(id).style.color=error?"#b42318":"#667085";}
+function hideMain(){["login","owner","worker","catalogue","setup"].forEach(hide);}
+function setTab(tabId){
+ document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===tabId));
+ document.querySelectorAll(".tab-pane").forEach(p=>p.classList.toggle("hidden",p.id!==tabId));
+ if(tabId==="productsTab")loadProductManager();
+ if(tabId==="workersTab")loadWorkers();
+ if(tabId==="jobsTab"){loadWorkers();loadJobs();}
+}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+
+async function start(){
+ try{
+  db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  const params=new URLSearchParams(location.search),store=params.get("store");
+  hide("loading");
+  if(store){await loadCatalogue(store,params.get("product"));return;}
+  const {data:{session},error}=await db.auth.getSession();if(error)throw error;
+  currentUser=session?.user||null;
+  if(!currentUser){show("login");return;}
+  const {data:p,error:pe}=await db.from("profiles").select("display_name,role,active").eq("id",currentUser.id).maybeSingle();
+  if(pe)throw pe;if(!p||!p.active){await db.auth.signOut();throw new Error("This account is inactive or has no GFS profile. Contact the GFS owner.");}
+  profile=p;$("userLabel").textContent=p.display_name||currentUser.email||"";
+  show("topSignOut");
+  if(p.role==="owner"){show("owner");await loadBusinesses();}
+  else if(p.role==="worker"){show("worker");await loadWorkerDashboard();}
+  else throw new Error("This account does not have a valid role.");
+ }catch(e){hide("loading");hideMain();show("setup");$("setupMsg").textContent=e.message||"Could not start the app.";}
+}
+$("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();msg("loginMsg","Signing in…");
+ const {error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+ if(error){msg("loginMsg",error.message,true);return;}location.href=location.pathname;
+});
+$("topSignOut").onclick=async()=>{await db.auth.signOut();location.href=location.pathname;};
+
+async function loadBusinesses(){
+ const {data,error}=await db.from("businesses").select("*").order("created_at",{ascending:false});
+ if(error){$("businessList").textContent=error.message;return;}
+ businesses=data||[];
+ const opts='<option value="">Choose a business</option>'+businesses.map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join("");
+ $("productBusiness").innerHTML=opts;$("jobBusiness").innerHTML=opts;
+ if(!businesses.length){$("businessList").className="empty";$("businessList").textContent="No businesses added yet.";return;}
+ $("businessList").className="grid";
+ $("businessList").innerHTML=businesses.map(b=>`<div class="panel"><strong>${esc(b.name)}</strong><p class="muted tiny">${esc(b.slug)}</p><p><span class="status">${b.is_published?"PUBLISHED":"UNPUBLISHED"}</span></p><p><a href="${esc(publicUrl(b.slug))}" target="_blank" rel="noopener">Open public catalogue</a></p><div class="row"><button class="btn plain" type="button" data-copy="${esc(publicUrl(b.slug))}">Copy link</button><button class="btn ${b.is_published?"pink":"green"}" type="button" data-publish="${b.id}" data-state="${b.is_published}">${b.is_published?"Unpublish":"Publish"}</button></div></div>`).join("");
+ document.querySelectorAll("[data-copy]").forEach(btn=>btn.onclick=()=>copyText(btn.dataset.copy,btn));
+ document.querySelectorAll("[data-publish]").forEach(btn=>btn.onclick=()=>togglePublish(btn.dataset.publish,btn.dataset.state==="true"));
+}
+async function copyText(value,button){try{await navigator.clipboard.writeText(value);button.textContent="Copied!";}catch(e){prompt("Copy this link:",value);}}
+async function togglePublish(id,published){
+ const {error}=await db.from("businesses").update({is_published:!published,updated_at:new Date().toISOString()}).eq("id",id);
+ if(error){alert(error.message);return;}await loadBusinesses();
+}
+$("refreshBusinesses").onclick=loadBusinesses;
+$("businessForm").addEventListener("submit",async e=>{
+ e.preventDefault();msg("businessMsg","Creating catalogue…");
+ const payload={owner_id:currentUser.id,name:$("businessName").value.trim(),slug:slugify($("businessSlug").value),whatsapp_number:$("businessWhatsapp").value.trim(),instagram_url:$("businessInstagram").value.trim()||null,description:$("businessDescription").value.trim()||null,logo_url:$("businessLogo").value.trim()||null,cover_url:$("businessCover").value.trim()||null,is_published:true};
+ const {error}=await db.from("businesses").insert(payload);
+ if(error){msg("businessMsg",error.message,true);return;}
+ msg("businessMsg","Catalogue created successfully.");e.target.reset();await loadBusinesses();
+});
+
+async function uploadProductImages(businessId,inputs){
+ const files=inputs.map(id=>$(id).files[0]).filter(Boolean);
+ if(!files.length)throw new Error("Please choose at least one product photo.");
+ if(files.length>3)throw new Error("You can upload up to three photos per product.");
+ const urls=[];
+ for(const file of files){
+  if(!/^image\/(jpeg|png|webp|gif)$/.test(file.type))throw new Error("Use JPG, PNG, WEBP or GIF images.");
+  if(file.size>10*1024*1024)throw new Error("Each image must be 10 MB or smaller.");
+  const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"-").slice(-70);
+  const path=businessId+"/"+crypto.randomUUID()+"-"+safe;
+  const {error}=await db.storage.from(BUCKET).upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type});
+  if(error)throw error;
+  const {data}=db.storage.from(BUCKET).getPublicUrl(path);urls.push(data.publicUrl);
+ }
+ return urls;
+}
+function productPayload(businessId,name,code,price,description,urls){
+ return {business_id:businessId,name:name.trim(),product_code:code.trim().toUpperCase(),price:Number(price),description:description.trim()||null,image_url:urls[0]||null,image_urls:urls,is_active:true};
+}
+$("productForm").addEventListener("submit",async e=>{
+ e.preventDefault();msg("productMsg","Uploading product photos…");
+ try{
+  const bid=$("productBusiness").value;
+  const urls=await uploadProductImages(bid,["image1","image2","image3"]);
+  const payload=productPayload(bid,$("productName").value,$("productCode").value,$("productPrice").value,$("productDescription").value,urls);
+  const {error}=await db.from("products").insert(payload);if(error)throw error;
+  msg("productMsg","Product and photos added successfully.");e.target.reset();await loadProductManager();
+ }catch(err){msg("productMsg",err.message||"Product upload failed.",true);}
+});
+async function loadProductManager(){
+ const bid=$("productBusiness").value;
+ if(!bid){$("productManager").className="empty";$("productManager").textContent="Choose a business in the product form above to view its products.";return;}
+ const {data,error}=await db.from("products").select("*").eq("business_id",bid).order("created_at",{ascending:false});
+ if(error){$("productManager").textContent=error.message;return;}
+ if(!data?.length){$("productManager").className="empty";$("productManager").textContent="No products in this catalogue yet.";return;}
+ $("productManager").className="grid";
+ $("productManager").innerHTML=data.map(p=>`<div class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}"><div class="card-body"><strong>${esc(p.name)}</strong><div class="price">${money(p.price)}</div><div class="code">${esc(p.product_code||"")}</div><span class="status">${p.is_active?"ACTIVE":"HIDDEN"}</span><div class="row" style="margin-top:10px"><button class="btn plain" data-edit-product="${p.id}" type="button">Edit</button><button class="btn ${p.is_active?"pink":"green"}" data-active-product="${p.id}" data-state="${p.is_active}" type="button">${p.is_active?"Hide":"Show"}</button></div></div></div>`).join("");
+ document.querySelectorAll("[data-edit-product]").forEach(b=>b.onclick=()=>editProduct(data.find(p=>p.id===b.dataset.editProduct)));
+ document.querySelectorAll("[data-active-product]").forEach(b=>b.onclick=()=>toggleProduct(b.dataset.activeProduct,b.dataset.state==="true"));
+}
+$("productBusiness").addEventListener("change",loadProductManager);$("refreshProducts").onclick=loadProductManager;
+async function editProduct(p){
+ if(!p)return;
+ const name=prompt("Product name:",p.name);if(name===null)return;
+ const price=prompt("Price:",p.price);if(price===null)return;
+ const description=prompt("Product description:",p.description||"");if(description===null)return;
+ const {error}=await db.from("products").update({name:name.trim(),price:Number(price),description:description.trim()||null,updated_at:new Date().toISOString()}).eq("id",p.id);
+ if(error){alert(error.message);return;}await loadProductManager();
+}
+async function toggleProduct(id,active){
+ const {error}=await db.from("products").update({is_active:!active,updated_at:new Date().toISOString()}).eq("id",id);
+ if(error){alert(error.message);return;}await loadProductManager();
+}
+
+async function loadWorkers(){
+ const {data,error}=await db.from("profiles").select("id,display_name,role,active,created_at").eq("role","worker").order("created_at",{ascending:false});
+ if(error){$("workerList").textContent=error.message;return;}
+ workers=data||[];
+ $("jobWorker").innerHTML='<option value="">Choose worker</option>'+workers.filter(w=>w.active).map(w=>`<option value="${w.id}">${esc(w.display_name||"Worker")} · ${w.id.slice(0,8)}</option>`).join("");
+ if(!workers.length){$("workerList").className="empty";$("workerList").textContent="No workers invited yet.";return;}
+ $("workerList").className="grid";
+ $("workerList").innerHTML=workers.map(w=>`<div class="panel"><strong>${esc(w.display_name||"Worker")}</strong><p class="tiny muted">${w.id.slice(0,8)}…</p><span class="status">${w.active?"ACTIVE":"INACTIVE"}</span><div style="margin-top:10px"><button class="btn ${w.active?"danger":"green"}" data-worker="${w.id}" data-active="${w.active}" type="button">${w.active?"Deactivate":"Activate"}</button></div></div>`).join("");
+ document.querySelectorAll("[data-worker]").forEach(b=>b.onclick=()=>toggleWorker(b.dataset.worker,b.dataset.active==="true"));
+}
+async function toggleWorker(id,active){
+ const {error}=await db.from("profiles").update({active:!active}).eq("id",id);
+ if(error){alert(error.message);return;}await loadWorkers();
+}
+$("refreshWorkers").onclick=loadWorkers;
+$("workerForm").addEventListener("submit",async e=>{
+ e.preventDefault();msg("workerMsg","Sending invitation…");
+ try{
+  const {data:{session}}=await db.auth.getSession();
+  const response=await fetch(SUPABASE_URL+"/functions/v1/gfs-invite-worker",{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+session.access_token},body:JSON.stringify({email:$("workerEmail").value.trim(),display_name:$("workerName").value.trim()})});
+  const result=await response.json();if(!response.ok||result.error)throw new Error(result.error||"Could not send invitation.");
+  msg("workerMsg","Invitation sent to "+result.worker.email+".");e.target.reset();await loadWorkers();
+ }catch(err){msg("workerMsg",err.message,true);}
+});
+$("jobForm").addEventListener("submit",async e=>{
+ e.preventDefault();msg("jobMsg","Assigning work…");
+ const payload={business_id:$("jobBusiness").value,assigned_worker_id:$("jobWorker").value,created_by:currentUser.id,status:"assigned",instructions:$("jobInstructions").value.trim()||null};
+ const {error}=await db.from("catalogue_jobs").insert(payload);
+ if(error){msg("jobMsg",error.message,true);return;}msg("jobMsg","Work assigned successfully.");e.target.reset();await loadJobs();
+});
+async function loadJobs(){
+ const {data,error}=await db.from("catalogue_jobs").select("id,status,instructions,created_at,businesses(name,slug),profiles!catalogue_jobs_assigned_worker_id_fkey(display_name)").order("created_at",{ascending:false});
+ if(error){$("jobList").textContent=error.message;return;}
+ if(!data?.length){$("jobList").className="empty";$("jobList").textContent="No work assignments yet.";return;}
+ $("jobList").className="grid";
+ $("jobList").innerHTML=data.map(j=>`<div class="panel"><strong>${esc(j.businesses?.name||"Business")}</strong><p class="tiny muted">Worker: ${esc(j.profiles?.display_name||"Assigned worker")}</p><span class="status">${esc(j.status.replaceAll("_"," "))}</span><p>${esc(j.instructions||"No special instructions.")}</p></div>`).join("");
+}
+$("refreshJobs").onclick=loadJobs;
+
+async function loadWorkerDashboard(){
+ const {data,error}=await db.from("catalogue_jobs").select("id,business_id,status,instructions,created_at,businesses(id,name,slug,whatsapp_number)").order("created_at",{ascending:false});
+ if(error){$("workerJobs").textContent=error.message;return;}
+ workerJobs=data||[];
+ const active=workerJobs.filter(j=>["assigned","in_progress","changes_requested"].includes(j.status));
+ $("workerProductBusiness").innerHTML='<option value="">Choose assigned business</option>'+active.map(j=>`<option value="${j.business_id}">${esc(j.businesses?.name||"Business")}</option>`).join("");
+ if(!workerJobs.length){$("workerJobs").className="empty";$("workerJobs").textContent="You do not have any assignments yet.";return;}
+ $("workerJobs").className="grid";
+ $("workerJobs").innerHTML=workerJobs.map(j=>`<div class="panel"><strong>${esc(j.businesses?.name||"Business")}</strong><p><span class="status">${esc(j.status.replaceAll("_"," "))}</span></p><p>${esc(j.instructions||"No special instructions.")}</p><div class="row"><button class="btn plain" data-job-start="${j.id}" type="button">Start work</button><button class="btn green" data-job-submit="${j.id}" type="button">Submit for review</button></div></div>`).join("");
+ document.querySelectorAll("[data-job-start]").forEach(b=>b.onclick=()=>updateJob(b.dataset.jobStart,"in_progress"));
+ document.querySelectorAll("[data-job-submit]").forEach(b=>b.onclick=()=>updateJob(b.dataset.jobSubmit,"submitted"));
+}
+async function updateJob(id,status){
+ const changes={status,updated_at:new Date().toISOString()};
+ if(status==="submitted")changes.submitted_at=new Date().toISOString();
+ const {error}=await db.from("catalogue_jobs").update(changes).eq("id",id);
+ if(error){alert(error.message);return;}await loadWorkerDashboard();
+}
+$("workerProductForm").addEventListener("submit",async e=>{
+ e.preventDefault();msg("workerProductMsg","Uploading product photos…");
+ try{
+  const bid=$("workerProductBusiness").value;
+  const urls=await uploadProductImages(bid,["workerImage1","workerImage2","workerImage3"]);
+  const payload=productPayload(bid,$("workerProductName").value,$("workerProductCode").value,$("workerProductPrice").value,$("workerProductDescription").value,urls);
+  const {error}=await db.from("products").insert(payload);if(error)throw error;
+  msg("workerProductMsg","Product added successfully.");e.target.reset();
+ }catch(err){msg("workerProductMsg",err.message||"Product upload failed.",true);}
+});
+
+async function loadCatalogue(slug,productCode){
+ hideMain();show("catalogue");
+ const {data:b,error}=await db.from("businesses").select("*").eq("slug",slug).eq("is_published",true).maybeSingle();
+ if(error||!b){$("catalogueHeader").innerHTML="<h1>Catalogue not found</h1><p class='muted'>This catalogue may be unpublished or the link may be incorrect.</p>";return;}
+ $("catalogueHeader").innerHTML=`<div class="row">${b.logo_url?`<img class="logo" src="${esc(b.logo_url)}" alt="Business logo">`:""}<div><h1>${esc(b.name)}</h1><p class="muted">${esc(b.description||"Browse our products below.")}</p></div></div>${b.cover_url?`<img class="cover" src="${esc(b.cover_url)}" alt="">`:""}${b.instagram_url?`<p><a href="${esc(b.instagram_url)}" target="_blank" rel="noopener">Visit Instagram</a></p>`:""}`;
+ const {data:items,error:pe}=await db.from("products").select("*").eq("business_id",b.id).eq("is_active",true).order("created_at",{ascending:false});
+ if(pe){$("catalogueProducts").textContent=pe.message;return;}
+ const products=items||[];$("productCount").textContent=products.length+" products";
+ if(productCode){
+  const p=products.find(x=>String(x.product_code).toLowerCase()===String(productCode).toLowerCase());
+  if(!p){$("productDetail").innerHTML="<h2>Product not found</h2><p>This product may no longer be available.</p>";show("productDetail");hide("catalogueListWrap");return;}
+  renderProductDetail(b,p,slug);show("productDetail");hide("catalogueListWrap");return;
+ }
+ hide("productDetail");show("catalogueListWrap");
+ if(!products.length){$("catalogueProducts").innerHTML='<div class="empty">Products will be added soon.</div>';return;}
+ $("catalogueProducts").innerHTML=products.map(p=>{
+  const link=publicUrl(slug)+"&product="+encodeURIComponent(p.product_code||"");
+  const text=`Hello, I am interested in ordering this product.\\nBusiness: ${b.name}\\nProduct: ${p.name}\\nCode: ${p.product_code||""}\\nPrice: ${money(p.price)}\\nPlease confirm availability.\\n${link}`;
+  return `<article class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}" loading="lazy"><div class="card-body"><strong>${esc(p.name)}</strong><div class="price">${money(p.price)}</div><div class="code">Product code: ${esc(p.product_code||"")}</div><a class="secondary-link" href="${esc(link)}">View product</a><a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER ON WHATSAPP</a></div></article>`;
+ }).join("");
+}
+function renderProductDetail(b,p,slug){
+ const images=Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls:(p.image_url?[p.image_url]:[]);
+ const link=publicUrl(slug)+"&product="+encodeURIComponent(p.product_code||"");
+ const text=`Hello, I am interested in ordering this product.\\nBusiness: ${b.name}\\nProduct: ${p.name}\\nCode: ${p.product_code||""}\\nPrice: ${money(p.price)}\\nPlease confirm availability.\\n${link}`;
+ $("productDetail").innerHTML=`<p><a href="${esc(publicUrl(slug))}">← Back to all products</a></p><div class="grid"><div>${images.map((src,i)=>`<img class="product-img" style="margin-bottom:8px;border-radius:10px" src="${esc(src)}" alt="${esc(p.name)} photo ${i+1}">`).join("")}</div><div><h1>${esc(p.name)}</h1><div class="price">${money(p.price)}</div><p class="code">Product code: ${esc(p.product_code||"")}</p><p>${esc(p.description||"")}</p><a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER THIS PRODUCT ON WHATSAPP</a><button id="shareProduct" class="btn plain" style="width:100%;margin-top:9px" type="button">Copy product link</button></div></div>`;
+ $("shareProduct").onclick=()=>copyText(link,$("shareProduct"));
+}
+start();
+</script>
+</body>
+</html>
