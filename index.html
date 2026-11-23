@@ -56,7 +56,7 @@ footer{text-align:center;color:var(--muted);padding:28px 10px;font-size:13px}
 <div class="panel"><h2>Create a business catalogue</h2>
 <form id="businessForm">
 <div class="grid"><div><label>Business name *</label><input id="businessName" required placeholder="e.g. Queen Beauty Store"></div><div><label>Catalogue link name *</label><input id="businessSlug" required placeholder="e.g. queen-beauty"></div><div><label>WhatsApp number *</label><input id="businessWhatsapp" required placeholder="2348012345678"></div><div><label>Instagram link</label><input id="businessInstagram" type="url" placeholder="https://instagram.com/yourstore"></div></div>
-<label>Business description</label><textarea id="businessDescription" placeholder="Introduce this business"></textarea>
+<label>Business description</label><textarea id="businessDescription" placeholder="Introduce this business"></textarea><div class="grid"><div><label>Business location (optional)</label><input id="businessLocation" placeholder="City, area or address"></div><div><label>Delivery locations (optional)</label><input id="deliveryLocations" placeholder="Areas/countries you deliver to"></div><div><label>Delivery timeframe (optional)</label><input id="deliveryTime" placeholder="e.g. Same day, 2–3 working days"></div><div><label>Delivery fee / arrangements (optional)</label><input id="deliveryInfo" placeholder="e.g. Free delivery or customer pays delivery"></div><div><label>Payment terms (optional)</label><input id="paymentTerms" placeholder="e.g. Full payment before dispatch"></div></div>
 <div class="grid"><div><label>Logo image URL (optional)</label><input id="businessLogo" type="url" placeholder="https://…"></div><div><label>Cover image URL (optional)</label><input id="businessCover" type="url" placeholder="https://…"></div></div>
 <div class="row" style="margin-top:14px"><button class="btn green" type="submit">Create catalogue</button></div></form><p id="businessMsg" class="msg"></p></div>
 <div class="panel"><div class="row between"><h2>Your businesses</h2><button id="refreshBusinesses" class="btn plain" type="button">Refresh</button></div><div id="businessList" class="empty">Loading businesses…</div></div>
@@ -67,7 +67,7 @@ footer{text-align:center;color:var(--muted);padding:28px 10px;font-size:13px}
 <form id="productForm">
 <label>Choose business *</label><select id="productBusiness" required><option value="">Choose a business</option></select>
 <div class="grid"><div><label>Product name *</label><input id="productName" required placeholder="e.g. Vitamin C Serum"></div><div><label>Product code *</label><input id="productCode" required placeholder="e.g. QZ01"></div><div><label>Price (numbers only) *</label><input id="productPrice" type="number" min="0" step="0.01" required placeholder="12000"></div></div>
-<label>Product description</label><textarea id="productDescription" placeholder="Optional product details"></textarea>
+<label>Product description</label><textarea id="productDescription" placeholder="Optional product details"></textarea><label>Product availability (optional)</label><select id="productAvailability"><option value="">Not specified</option><option value="in_stock">In stock</option><option value="out_of_stock">Out of stock</option><option value="available_on_request">Available on request</option></select>
 <div class="grid"><div class="file-box"><label>Product photo 1 *</label><input id="image1" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required></div><div class="file-box"><label>Product photo 2 (optional)</label><input id="image2" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div><div class="file-box"><label>Product photo 3 (optional)</label><input id="image3" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div></div>
 <div class="row" style="margin-top:14px"><button class="btn green" type="submit">Upload photos and add product</button></div></form><p id="productMsg" class="msg"></p></div>
 <div class="panel"><div class="row between"><h2>Product manager</h2><button id="refreshProducts" class="btn plain" type="button">Refresh</button></div><div id="productManager" class="empty">Choose a business to view its products.</div></div>
@@ -91,7 +91,7 @@ footer{text-align:center;color:var(--muted);padding:28px 10px;font-size:13px}
 <div class="panel"><h2>Add products to an assigned catalogue</h2><p class="muted tiny">You can add products only to businesses assigned to you by the GFS owner.</p>
 <form id="workerProductForm"><label>Assigned business *</label><select id="workerProductBusiness" required><option value="">Choose an assigned business</option></select>
 <div class="grid"><div><label>Product name *</label><input id="workerProductName" required></div><div><label>Product code *</label><input id="workerProductCode" required></div><div><label>Price *</label><input id="workerProductPrice" type="number" min="0" step="0.01" required></div></div>
-<label>Description</label><textarea id="workerProductDescription"></textarea>
+<label>Description</label><textarea id="workerProductDescription"></textarea><label>Product availability (optional)</label><select id="workerProductAvailability"><option value="">Not specified</option><option value="in_stock">In stock</option><option value="out_of_stock">Out of stock</option><option value="available_on_request">Available on request</option></select>
 <div class="grid"><div class="file-box"><label>Product photo 1 *</label><input id="workerImage1" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required></div><div class="file-box"><label>Product photo 2</label><input id="workerImage2" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div><div class="file-box"><label>Product photo 3</label><input id="workerImage3" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div></div>
 <div class="row" style="margin-top:14px"><button class="btn green" type="submit">Upload and add product</button></div></form><p id="workerProductMsg" class="msg"></p></div>
 </section>
@@ -164,10 +164,12 @@ async function loadBusinesses(){
  $("productBusiness").innerHTML=opts;$("jobBusiness").innerHTML=opts;
  if(!businesses.length){$("businessList").className="empty";$("businessList").textContent="No businesses added yet.";return;}
  $("businessList").className="grid";
- $("businessList").innerHTML=businesses.map(b=>`<div class="panel"><strong>${esc(b.name)}</strong><p class="muted tiny">${esc(b.slug)}</p><p><span class="status">${b.is_published?"PUBLISHED":"UNPUBLISHED"}</span></p><p><a href="${esc(publicUrl(b.slug))}" target="_blank" rel="noopener">Open public catalogue</a></p><div class="row"><button class="btn plain" type="button" data-copy="${esc(publicUrl(b.slug))}">Copy link</button><button class="btn ${b.is_published?"pink":"green"}" type="button" data-publish="${b.id}" data-state="${b.is_published}">${b.is_published?"Unpublish":"Publish"}</button></div></div>`).join("");
+ $("businessList").innerHTML=businesses.map(b=>`<div class="panel"><strong>${esc(b.name)}</strong><p class="muted tiny">${esc(b.slug)}</p><p><span class="status">${b.is_published?"PUBLISHED":"UNPUBLISHED"}</span></p><p><a href="${esc(publicUrl(b.slug))}" target="_blank" rel="noopener">Open public catalogue</a></p><div class="row"><button class="btn plain" type="button" data-copy="${esc(publicUrl(b.slug))}">Copy link</button><button class="btn plain" type="button" data-business-info="${b.id}">Edit delivery info</button><button class="btn ${b.is_published?"pink":"green"}" type="button" data-publish="${b.id}" data-state="${b.is_published}">${b.is_published?"Unpublish":"Publish"}</button></div></div>`).join("");
  document.querySelectorAll("[data-copy]").forEach(btn=>btn.onclick=()=>copyText(btn.dataset.copy,btn));
  document.querySelectorAll("[data-publish]").forEach(btn=>btn.onclick=()=>togglePublish(btn.dataset.publish,btn.dataset.state==="true"));
+ document.querySelectorAll("[data-business-info]").forEach(btn=>btn.onclick=()=>editBusinessInfo(businesses.find(x=>x.id===btn.dataset.businessInfo)));
 }
+async function editBusinessInfo(b){if(!b)return;const location=prompt("Business location (optional):",b.business_location||"");if(location===null)return;const destinations=prompt("Delivery locations (optional):",b.delivery_locations||"");if(destinations===null)return;const time=prompt("Delivery timeframe (optional):",b.delivery_time||"");if(time===null)return;const delivery=prompt("Delivery fee / arrangements (optional):",b.delivery_info||"");if(delivery===null)return;const payment=prompt("Payment terms (optional):",b.payment_terms||"");if(payment===null)return;const {error}=await db.from("businesses").update({business_location:location.trim()||null,delivery_locations:destinations.trim()||null,delivery_time:time.trim()||null,delivery_info:delivery.trim()||null,payment_terms:payment.trim()||null,updated_at:new Date().toISOString()}).eq("id",b.id);if(error){alert(error.message);return;}await loadBusinesses();}
 async function copyText(value,button){try{await navigator.clipboard.writeText(value);button.textContent="Copied!";}catch(e){prompt("Copy this link:",value);}}
 async function togglePublish(id,published){
  const {error}=await db.from("businesses").update({is_published:!published,updated_at:new Date().toISOString()}).eq("id",id);
@@ -176,7 +178,7 @@ async function togglePublish(id,published){
 $("refreshBusinesses").onclick=loadBusinesses;
 $("businessForm").addEventListener("submit",async e=>{
  e.preventDefault();msg("businessMsg","Creating catalogue…");
- const payload={owner_id:currentUser.id,name:$("businessName").value.trim(),slug:slugify($("businessSlug").value),whatsapp_number:$("businessWhatsapp").value.trim(),instagram_url:$("businessInstagram").value.trim()||null,description:$("businessDescription").value.trim()||null,logo_url:$("businessLogo").value.trim()||null,cover_url:$("businessCover").value.trim()||null,is_published:true};
+ const payload={owner_id:currentUser.id,name:$("businessName").value.trim(),slug:slugify($("businessSlug").value),whatsapp_number:$("businessWhatsapp").value.trim(),instagram_url:$("businessInstagram").value.trim()||null,description:$("businessDescription").value.trim()||null,logo_url:$("businessLogo").value.trim()||null,cover_url:$("businessCover").value.trim()||null,business_location:$("businessLocation").value.trim()||null,delivery_locations:$("deliveryLocations").value.trim()||null,delivery_time:$("deliveryTime").value.trim()||null,delivery_info:$("deliveryInfo").value.trim()||null,payment_terms:$("paymentTerms").value.trim()||null,is_published:true};
  const {error}=await db.from("businesses").insert(payload);
  if(error){msg("businessMsg",error.message,true);return;}
  msg("businessMsg","Catalogue created successfully.");e.target.reset();await loadBusinesses();
@@ -198,15 +200,15 @@ async function uploadProductImages(businessId,inputs){
  }
  return urls;
 }
-function productPayload(businessId,name,code,price,description,urls){
- return {business_id:businessId,name:name.trim(),product_code:code.trim().toUpperCase(),price:Number(price),description:description.trim()||null,image_url:urls[0]||null,image_urls:urls,is_active:true};
+function productPayload(businessId,name,code,price,description,urls,availability){
+ return {business_id:businessId,name:name.trim(),product_code:code.trim().toUpperCase(),price:Number(price),description:description.trim()||null,image_url:urls[0]||null,image_urls:urls,availability_status:availability||null,is_active:true};
 }
 $("productForm").addEventListener("submit",async e=>{
  e.preventDefault();msg("productMsg","Uploading product photos…");
  try{
   const bid=$("productBusiness").value;
   const urls=await uploadProductImages(bid,["image1","image2","image3"]);
-  const payload=productPayload(bid,$("productName").value,$("productCode").value,$("productPrice").value,$("productDescription").value,urls);
+  const payload=productPayload(bid,$("productName").value,$("productCode").value,$("productPrice").value,$("productDescription").value,urls,$("productAvailability").value);
   const {error}=await db.from("products").insert(payload);if(error)throw error;
   msg("productMsg","Product and photos added successfully.");e.target.reset();await loadProductManager();
  }catch(err){msg("productMsg",err.message||"Product upload failed.",true);}
@@ -228,7 +230,8 @@ async function editProduct(p){
  const name=prompt("Product name:",p.name);if(name===null)return;
  const price=prompt("Price:",p.price);if(price===null)return;
  const description=prompt("Product description:",p.description||"");if(description===null)return;
- const {error}=await db.from("products").update({name:name.trim(),price:Number(price),description:description.trim()||null,updated_at:new Date().toISOString()}).eq("id",p.id);
+ const status=prompt("Availability: leave blank, or enter in_stock, out_of_stock, available_on_request",p.availability_status||"");if(status===null)return;const allowed=["","in_stock","out_of_stock","available_on_request"];if(!allowed.includes(status.trim())){alert("Use in_stock, out_of_stock, available_on_request, or leave blank.");return;}
+ const {error}=await db.from("products").update({name:name.trim(),price:Number(price),description:description.trim()||null,availability_status:status.trim()||null,updated_at:new Date().toISOString()}).eq("id",p.id);
  if(error){alert(error.message);return;}await loadProductManager();
 }
 async function toggleProduct(id,active){
@@ -298,7 +301,7 @@ $("workerProductForm").addEventListener("submit",async e=>{
  try{
   const bid=$("workerProductBusiness").value;
   const urls=await uploadProductImages(bid,["workerImage1","workerImage2","workerImage3"]);
-  const payload=productPayload(bid,$("workerProductName").value,$("workerProductCode").value,$("workerProductPrice").value,$("workerProductDescription").value,urls);
+  const payload=productPayload(bid,$("workerProductName").value,$("workerProductCode").value,$("workerProductPrice").value,$("workerProductDescription").value,urls,$("workerProductAvailability").value);
   const {error}=await db.from("products").insert(payload);if(error)throw error;
   msg("workerProductMsg","Product added successfully.");e.target.reset();
  }catch(err){msg("workerProductMsg",err.message||"Product upload failed.",true);}
@@ -321,15 +324,19 @@ async function loadCatalogue(slug,productCode){
  if(!products.length){$("catalogueProducts").innerHTML='<div class="empty">Products will be added soon.</div>';return;}
  $("catalogueProducts").innerHTML=products.map(p=>{
   const link=productUrl(slug,p.product_code||"");
-  const text=`Hello, I am interested in ordering this product.\\nBusiness: ${b.name}\\nProduct: ${p.name}\\nCode: ${p.product_code||""}\\nPrice: ${money(p.price)}\\nPlease confirm availability.\\n${link}`;
-  return `<article class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}" loading="lazy"><div class="card-body"><strong>${esc(p.name)}</strong><div class="price">${money(p.price)}</div><div class="code">Product code: ${esc(p.product_code||"")}</div><a class="secondary-link" href="${esc(link)}">View product</a><a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER ON WHATSAPP</a></div></article>`;
+  const stockLabel={in_stock:"In stock",out_of_stock:"Out of stock",available_on_request:"Available on request"}[p.availability_status]||"";
+  const businessDetails=[b.business_location&&"Business location: "+b.business_location,b.delivery_locations&&"Delivery locations: "+b.delivery_locations,b.delivery_time&&"Delivery timeframe: "+b.delivery_time,b.delivery_info&&"Delivery: "+b.delivery_info,b.payment_terms&&"Payment: "+b.payment_terms].filter(Boolean).join("\\n");
+  const text=`Hello, I am interested in ordering this product.\\nBusiness: ${b.name}\\nProduct: ${p.name}\\nCode: ${p.product_code||""}\\nPrice: ${money(p.price)}${stockLabel?"\\nAvailability: "+stockLabel:""}${businessDetails?"\\n"+businessDetails:""}\\n${link}`;
+  return `<article class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}" loading="lazy"><div class="card-body"><strong>${esc(p.name)}</strong><div class="price">${money(p.price)}</div><div class="code">Product code: ${esc(p.product_code||"")}</div>${p.availability_status?`<p><span class="status">${({in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE ON REQUEST"})[p.availability_status]||""}</span></p>`:""}<a class="secondary-link" href="${esc(link)}">View product</a><a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER ON WHATSAPP</a></div></article>`;
  }).join("");
 }
 function renderProductDetail(b,p,slug){
  const images=Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls:(p.image_url?[p.image_url]:[]);
  const link=productUrl(slug,p.product_code||"");
- const text=`Hello, I am interested in ordering this product.\\nBusiness: ${b.name}\\nProduct: ${p.name}\\nCode: ${p.product_code||""}\\nPrice: ${money(p.price)}\\nPlease confirm availability.\\n${link}`;
- $("productDetail").innerHTML=`<p><a href="${esc(publicUrl(slug))}">← Back to all products</a></p><div class="grid"><div>${images.map((src,i)=>`<img class="product-img" style="margin-bottom:8px;border-radius:10px" src="${esc(src)}" alt="${esc(p.name)} photo ${i+1}">`).join("")}</div><div><h1>${esc(p.name)}</h1><div class="price">${money(p.price)}</div><p class="code">Product code: ${esc(p.product_code||"")}</p><p>${esc(p.description||"")}</p><a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER THIS PRODUCT ON WHATSAPP</a><button id="shareProduct" class="btn plain" style="width:100%;margin-top:9px" type="button">Copy product link</button></div></div>`;
+ const stockLabel={in_stock:"In stock",out_of_stock:"Out of stock",available_on_request:"Available on request"}[p.availability_status]||"";
+ const businessDetails=[b.business_location&&"Business location: "+b.business_location,b.delivery_locations&&"Delivery locations: "+b.delivery_locations,b.delivery_time&&"Delivery timeframe: "+b.delivery_time,b.delivery_info&&"Delivery: "+b.delivery_info,b.payment_terms&&"Payment: "+b.payment_terms].filter(Boolean).join("\\n");
+ const text=`Hello, I am interested in ordering this product.\\nBusiness: ${b.name}\\nProduct: ${p.name}\\nCode: ${p.product_code||""}\\nPrice: ${money(p.price)}${stockLabel?"\\nAvailability: "+stockLabel:""}${businessDetails?"\\n"+businessDetails:""}\\n${link}`;
+ $("productDetail").innerHTML=`<p><a href="${esc(publicUrl(slug))}">← Back to all products</a></p><div class="grid"><div>${images.map((src,i)=>`<img class="product-img" style="margin-bottom:8px;border-radius:10px" src="${esc(src)}" alt="${esc(p.name)} photo ${i+1}">`).join("")}</div><div><h1>${esc(p.name)}</h1><div class="price">${money(p.price)}</div><p class="code">Product code: ${esc(p.product_code||"")}</p>${p.availability_status?`<p><span class="status">${({in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE ON REQUEST"})[p.availability_status]||""}</span></p>`:""}<p>${esc(p.description||"")}</p>${b.business_location?`<p><strong>Business location:</strong> ${esc(b.business_location)}</p>`:""}${b.delivery_locations?`<p><strong>Delivery locations:</strong> ${esc(b.delivery_locations)}</p>`:""}${b.delivery_time?`<p><strong>Delivery timeframe:</strong> ${esc(b.delivery_time)}</p>`:""}${b.delivery_info?`<p><strong>Delivery:</strong> ${esc(b.delivery_info)}</p>`:""}${b.payment_terms?`<p><strong>Payment:</strong> ${esc(b.payment_terms)}</p>`:""}<a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER THIS PRODUCT ON WHATSAPP</a><button id="shareProduct" class="btn plain" style="width:100%;margin-top:9px" type="button">Copy product link</button></div></div>`;
  $("shareProduct").onclick=()=>copyText(link,$("shareProduct"));
 }
 start();
