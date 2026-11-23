@@ -24,7 +24,7 @@ textarea{min-height:75px;resize:vertical}
 .notice{padding:12px;border-radius:9px;background:#f8fafc;border:1px solid var(--line);margin:12px 0}
 .msg{margin:8px 0;min-height:20px;font-size:14px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font-weight:700}.tab.active{background:var(--pink);border-color:#efbad5}
 .card{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}.card-body{padding:13px}
-.product-img{width:100%;height:205px;object-fit:fill;object-position:center;background:#fff;display:block;padding:0;cursor:zoom-in}
+.product-img{width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;object-position:center;background:#fff;display:block;padding:0;cursor:zoom-in}
 .photo-viewer{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.96);display:flex;align-items:center;justify-content:center;padding:16px}
 .photo-viewer.hidden{display:none!important}.photo-viewer img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .photo-viewer button{position:absolute;border:0;border-radius:999px;background:rgba(255,255,255,.16);color:#fff;font-size:24px;width:46px;height:46px}
@@ -424,14 +424,15 @@ async function loadCatalogue(slug,productCode){
  const {data:b,error}=await db.from("businesses").select("*").eq("slug",slug).eq("is_published",true).maybeSingle();
  if(error||!b){$("catalogueHeader").innerHTML="<h1>Catalogue not found</h1><p class='muted'>This catalogue may be unpublished or the link may be incorrect.</p>";return;}
  $("catalogueHeader").innerHTML=`<div class="row">${b.logo_url?`<img class="logo" src="${esc(b.logo_url)}" alt="Business logo">`:""}<div><h1>${esc(b.name)}</h1><p class="muted">${esc(b.description||(b.catalogue_type==="menu"?"Explore our menu below.":"Browse our products below."))}</p><span class="status">${b.catalogue_type==="menu"?"MENU":"PRODUCT CATALOGUE"}</span></div></div>${b.cover_url?`<img class="cover" src="${esc(b.cover_url)}" alt="">`:""}${b.instagram_url?`<p><a href="${esc(b.instagram_url)}" target="_blank" rel="noopener">Visit Instagram</a></p>`:""}${b.business_location?`<p><strong>Business location:</strong> ${esc(b.business_location)}</p>`:""}${b.delivery_time?`<p><strong>Delivery timeframe:</strong> ${esc(b.delivery_time)}</p>`:""}${b.delivery_info?`<p><strong>Delivery:</strong> ${esc(b.delivery_info)}</p>`:""}${b.payment_terms?`<p><strong>Payment:</strong> ${esc(b.payment_terms)}</p>`:""}`;
- const {data:items,error:pe}=await db.from("products").select("*").eq("business_id",b.id).eq("is_active",true).order("created_at",{ascending:false});
- if(pe){$("catalogueProducts").textContent=pe.message;return;}
- const products=items||[];const isMenu=b.catalogue_type==="menu";$("catalogueItemsHeading").textContent=isMenu?"Menu":"Products";$("productCount").textContent=products.length+(isMenu?" menu items":" products");
  if(productCode){
-  const p=products.find(x=>String(x.product_code).toLowerCase()===String(productCode).toLowerCase());
+  const {data:p,error:productError}=await db.from("products").select("*").eq("business_id",b.id).eq("is_active",true).ilike("product_code",productCode).maybeSingle();
+  if(productError){$("productDetail").innerHTML="<h2>Could not load product</h2><p class='muted'>Please try again.</p>";show("productDetail");hide("catalogueListWrap");return;}
   if(!p){$("productDetail").innerHTML="<h2>Product not found</h2><p>This product may no longer be available.</p>";show("productDetail");hide("catalogueListWrap");return;}
   renderProductDetail(b,p,slug);show("productDetail");hide("catalogueListWrap");return;
  }
+ const {data:items,error:pe}=await db.from("products").select("*").eq("business_id",b.id).eq("is_active",true).order("created_at",{ascending:false});
+ if(pe){$("catalogueProducts").textContent=pe.message;return;}
+ const products=items||[];const isMenu=b.catalogue_type==="menu";$("catalogueItemsHeading").textContent=isMenu?"Menu":"Products";$("productCount").textContent=products.length+(isMenu?" menu items":" products");
  hide("productDetail");show("catalogueListWrap");
  if(!products.length){$("catalogueProducts").innerHTML='<div class="empty">Products will be added soon.</div>';return;}
  $("catalogueProducts").innerHTML=products.map(p=>{
@@ -439,7 +440,7 @@ async function loadCatalogue(slug,productCode){
   const stockLabel={in_stock:"In stock",out_of_stock:"Out of stock",available_on_request:"Available on request"}[p.availability_status]||"";
   const businessDetails=[b.business_location&&"Business location: "+b.business_location,b.delivery_time&&"Delivery timeframe: "+b.delivery_time,b.delivery_info&&"Delivery: "+b.delivery_info,b.payment_terms&&"Payment: "+b.payment_terms].filter(Boolean).join("\n");
   const text=`Hello, I am interested in ordering this product.\nBusiness: ${b.name}\nProduct: ${p.name}\nCode: ${p.product_code||""}\nPrice: ${money(p.price)}${stockLabel?"\nAvailability: "+stockLabel:""}${businessDetails?"\n"+businessDetails:""}\n${link}`;
-  return `<article class="card"><img class="product-img" data-open-image data-images="${esc(JSON.stringify(p.image_url?[p.image_url]:[]))}" src="${esc(p.image_url||"")}" alt="${esc(p.name)}" loading="lazy"><div class="card-body"><strong>${esc(p.name)}</strong><p class="tiny muted">${esc(p.category||"")}</p><div class="price">${money(p.price)}</div><div class="code">${p.product_code?"Item code: "+esc(p.product_code):""}</div>${p.availability_status?`<p><span class="status">${({in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE ON REQUEST"})[p.availability_status]||""}</span></p>`:""}${p.product_code?`<a class="secondary-link" href="${esc(link)}">View product</a>`:""}<a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER ON WHATSAPP</a></div></article>`;
+  return `<article class="card"><img class="product-img" data-open-image data-images="${esc(JSON.stringify(Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls:(p.image_url?[p.image_url]:[])))}" src="${esc((Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls[0]:p.image_url)||"")}" alt="${esc(p.name)}" loading="lazy"><div class="card-body"><strong>${esc(p.name)}</strong><p class="tiny muted">${esc(p.category||"")}</p><div class="price">${money(p.price)}</div><div class="code">${p.product_code?"Item code: "+esc(p.product_code):""}</div>${p.availability_status?`<p><span class="status">${({in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE ON REQUEST"})[p.availability_status]||""}</span></p>`:""}${p.product_code?`<a class="secondary-link" href="${esc(link)}">View product</a>`:""}<a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER ON WHATSAPP</a></div></article>`;
  }).join("");
 }
 function renderProductDetail(b,p,slug){
