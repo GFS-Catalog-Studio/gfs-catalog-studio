@@ -116,6 +116,7 @@ const money=n=>"₦"+Number(n||0).toLocaleString("en-NG");
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const slugify=s=>String(s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 const publicUrl=slug=>location.origin+location.pathname+"?store="+encodeURIComponent(slug);
+const productUrl=(slug,code)=>location.origin+"/p/"+encodeURIComponent(slug)+"/"+encodeURIComponent(String(code||"").toUpperCase());
 const waUrl=(number,text)=>"https://wa.me/"+String(number||"").replace(/\D/g,"")+"?text="+encodeURIComponent(text);
 let db=null,currentUser=null,profile=null,businesses=[],workers=[],workerJobs=[];
 
@@ -319,14 +320,14 @@ async function loadCatalogue(slug,productCode){
  hide("productDetail");show("catalogueListWrap");
  if(!products.length){$("catalogueProducts").innerHTML='<div class="empty">Products will be added soon.</div>';return;}
  $("catalogueProducts").innerHTML=products.map(p=>{
-  const link=publicUrl(slug)+"&product="+encodeURIComponent(p.product_code||"");
+  const link=productUrl(slug,p.product_code||"");
   const text=`Hello, I am interested in ordering this product.\\nBusiness: ${b.name}\\nProduct: ${p.name}\\nCode: ${p.product_code||""}\\nPrice: ${money(p.price)}\\nPlease confirm availability.\\n${link}`;
   return `<article class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}" loading="lazy"><div class="card-body"><strong>${esc(p.name)}</strong><div class="price">${money(p.price)}</div><div class="code">Product code: ${esc(p.product_code||"")}</div><a class="secondary-link" href="${esc(link)}">View product</a><a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER ON WHATSAPP</a></div></article>`;
  }).join("");
 }
 function renderProductDetail(b,p,slug){
  const images=Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls:(p.image_url?[p.image_url]:[]);
- const link=publicUrl(slug)+"&product="+encodeURIComponent(p.product_code||"");
+ const link=productUrl(slug,p.product_code||"");
  const text=`Hello, I am interested in ordering this product.\\nBusiness: ${b.name}\\nProduct: ${p.name}\\nCode: ${p.product_code||""}\\nPrice: ${money(p.price)}\\nPlease confirm availability.\\n${link}`;
  $("productDetail").innerHTML=`<p><a href="${esc(publicUrl(slug))}">← Back to all products</a></p><div class="grid"><div>${images.map((src,i)=>`<img class="product-img" style="margin-bottom:8px;border-radius:10px" src="${esc(src)}" alt="${esc(p.name)} photo ${i+1}">`).join("")}</div><div><h1>${esc(p.name)}</h1><div class="price">${money(p.price)}</div><p class="code">Product code: ${esc(p.product_code||"")}</p><p>${esc(p.description||"")}</p><a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER THIS PRODUCT ON WHATSAPP</a><button id="shareProduct" class="btn plain" style="width:100%;margin-top:9px" type="button">Copy product link</button></div></div>`;
  $("shareProduct").onclick=()=>copyText(link,$("shareProduct"));
