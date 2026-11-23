@@ -177,14 +177,15 @@ async function togglePublish(id,published){
 }
 $("refreshBusinesses").onclick=loadBusinesses;
 $("businessForm").addEventListener("submit",async e=>{
- e.preventDefault();msg("businessMsg","Creating catalogue…");
- const logoFile=$("businessLogo").files[0],coverFile=$("businessCover").files[0];
- const logoUrl=logoFile?await uploadSingleImage(logoFile,"business-logos"):null;
- const coverUrl=coverFile?await uploadSingleImage(coverFile,"business-covers"):null;
- const payload={owner_id:currentUser.id,name:$("businessName").value.trim(),slug:slugify($("businessSlug").value),whatsapp_number:$("businessWhatsapp").value.trim(),instagram_url:$("businessInstagram").value.trim()||null,description:$("businessDescription").value.trim()||null,logo_url:logoUrl,cover_url:coverUrl,business_location:$("businessLocation").value.trim()||null,delivery_time:$("deliveryTime").value.trim()||null,delivery_info:$("deliveryInfo").value.trim()||null,payment_terms:$("paymentTerms").value.trim()||null,is_published:true};
- const {error}=await db.from("businesses").insert(payload);
- if(error){msg("businessMsg",error.message,true);return;}
- msg("businessMsg","Catalogue created successfully.");e.target.reset();await loadBusinesses();
+ e.preventDefault();msg("businessMsg","Uploading images and creating catalogue…");
+ try{
+  const logoFile=$("businessLogo").files[0],coverFile=$("businessCover").files[0];
+  const logoUrl=logoFile?await uploadSingleImage(logoFile,"business-logos"):null;
+  const coverUrl=coverFile?await uploadSingleImage(coverFile,"business-covers"):null;
+  const payload={owner_id:currentUser.id,name:$("businessName").value.trim(),slug:slugify($("businessSlug").value),whatsapp_number:$("businessWhatsapp").value.trim(),instagram_url:$("businessInstagram").value.trim()||null,description:$("businessDescription").value.trim()||null,logo_url:logoUrl,cover_url:coverUrl,business_location:$("businessLocation").value.trim()||null,delivery_time:$("deliveryTime").value.trim()||null,delivery_info:$("deliveryInfo").value.trim()||null,payment_terms:$("paymentTerms").value.trim()||null,is_published:true};
+  const {error}=await db.from("businesses").insert(payload);if(error)throw error;
+  msg("businessMsg","Catalogue created successfully.");e.target.reset();await loadBusinesses();
+ }catch(err){msg("businessMsg",err.message||"Could not create catalogue.",true);}
 });
 
 async function uploadSingleImage(file,folder){
@@ -346,7 +347,7 @@ function renderProductDetail(b,p,slug){
  const images=Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls:(p.image_url?[p.image_url]:[]);
  const link=productUrl(slug,p.product_code||"");
  const stockLabel={in_stock:"In stock",out_of_stock:"Out of stock",available_on_request:"Available on request"}[p.availability_status]||"";
- const businessDetails=[b.business_location&&"Business location: "+b.business_location,b.delivery_locations&&"Delivery locations: "+b.delivery_locations,b.delivery_time&&"Delivery timeframe: "+b.delivery_time,b.delivery_info&&"Delivery: "+b.delivery_info,b.payment_terms&&"Payment: "+b.payment_terms].filter(Boolean).join("\n");
+ const businessDetails=[b.business_location&&"Business location: "+b.business_location,b.delivery_time&&"Delivery timeframe: "+b.delivery_time,b.delivery_info&&"Delivery: "+b.delivery_info,b.payment_terms&&"Payment: "+b.payment_terms].filter(Boolean).join("\n");
  const text=`Hello, I am interested in ordering this product.\nBusiness: ${b.name}\nProduct: ${p.name}\nCode: ${p.product_code||""}\nPrice: ${money(p.price)}${stockLabel?"\nAvailability: "+stockLabel:""}${businessDetails?"\n"+businessDetails:""}\n${link}`;
  $("productDetail").innerHTML=`<p><a href="${esc(publicUrl(slug))}">← Back to all products</a></p><div class="grid"><div>${images.map((src,i)=>`<img class="product-img" style="margin-bottom:8px;border-radius:10px" src="${esc(src)}" alt="${esc(p.name)} photo ${i+1}">`).join("")}</div><div><h1>${esc(p.name)}</h1><div class="price">${money(p.price)}</div><p class="code">Product code: ${esc(p.product_code||"")}</p>${p.availability_status?`<p><span class="status">${({in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE ON REQUEST"})[p.availability_status]||""}</span></p>`:""}<p>${esc(p.description||"")}</p>${b.business_location?`<p><strong>Business location:</strong> ${esc(b.business_location)}</p>`:""}${b.delivery_time?`<p><strong>Delivery timeframe:</strong> ${esc(b.delivery_time)}</p>`:""}${b.delivery_info?`<p><strong>Delivery:</strong> ${esc(b.delivery_info)}</p>`:""}${b.payment_terms?`<p><strong>Payment:</strong> ${esc(b.payment_terms)}</p>`:""}<a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER THIS PRODUCT ON WHATSAPP</a><button id="shareProduct" class="btn plain" style="width:100%;margin-top:9px" type="button">Copy product link</button></div></div>`;
  $("shareProduct").onclick=()=>copyText(link,$("shareProduct"));
