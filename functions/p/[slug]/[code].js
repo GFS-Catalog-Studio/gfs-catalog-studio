@@ -40,7 +40,7 @@ export async function onRequestGet(context) {
 
   try {
     const businesses = await rows("businesses", {
-      select: "id,name,slug,description,whatsapp_number,is_published",
+      select: "id,name,slug,description,whatsapp_number,is_published,business_location,delivery_locations,delivery_time,delivery_info,payment_terms",
       slug: "eq." + slug,
       is_published: "eq.true",
       limit: "1"
@@ -49,7 +49,7 @@ export async function onRequestGet(context) {
     if (!business) return new Response("Catalogue not found.", { status: 404 });
 
     const products = await rows("products", {
-      select: "name,product_code,price,description,image_url,image_urls,is_active",
+      select: "name,product_code,price,description,image_url,image_urls,is_active,availability_status",
       business_id: "eq." + business.id,
       product_code: "eq." + code,
       is_active: "eq.true",
@@ -66,9 +66,11 @@ export async function onRequestGet(context) {
     const storeLink = requestUrl.origin + "/?store=" + encodeURIComponent(slug);
     const price = "₦" + Number(product.price || 0).toLocaleString("en-NG");
     const number = String(business.whatsapp_number || "").replace(/\D/g, "");
+    const stockLabel = { in_stock: "In stock", out_of_stock: "Out of stock", available_on_request: "Available on request" }[product.availability_status] || "";
+    const businessDetails = [business.business_location && "Business location: " + business.business_location, business.delivery_locations && "Delivery locations: " + business.delivery_locations, business.delivery_time && "Delivery timeframe: " + business.delivery_time, business.delivery_info && "Delivery: " + business.delivery_info, business.payment_terms && "Payment: " + business.payment_terms].filter(Boolean).join("\n");
     const message = "Hello, I am interested in ordering this product.\nBusiness: " + business.name +
       "\nProduct: " + product.name + "\nCode: " + code + "\nPrice: " + price +
-      "\nPlease confirm availability.\n" + canonical;
+      (stockLabel ? "\nAvailability: " + stockLabel : "") + (businessDetails ? "\n" + businessDetails : "") + "\n" + canonical;
     const orderLink = number ? "https://wa.me/" + number + "?text=" + encodeURIComponent(message) : "";
 
     const galleryItems = [product.image_url, ...images].filter((item, index, list) =>
@@ -107,7 +109,13 @@ export async function onRequestGet(context) {
       '<section class="box"><div class="muted">' + esc(business.name) + '</div>' +
       '<h1>' + esc(product.name) + '</h1><div class="price">' + esc(price) + '</div>' +
       '<div class="code">Product code: ' + esc(code) + '</div>' +
+      (stockLabel ? '<p><strong>Availability:</strong> ' + esc(stockLabel) + '</p>' : '') +
       '<p>' + esc(product.description || "Contact the business for more details.") + '</p>' +
+      (business.business_location ? '<p><strong>Business location:</strong> ' + esc(business.business_location) + '</p>' : '') +
+      (business.delivery_locations ? '<p><strong>Delivery locations:</strong> ' + esc(business.delivery_locations) + '</p>' : '') +
+      (business.delivery_time ? '<p><strong>Delivery timeframe:</strong> ' + esc(business.delivery_time) + '</p>' : '') +
+      (business.delivery_info ? '<p><strong>Delivery:</strong> ' + esc(business.delivery_info) + '</p>' : '') +
+      (business.payment_terms ? '<p><strong>Payment:</strong> ' + esc(business.payment_terms) + '</p>' : '') +
       '<div class="gallery">' + gallery + '</div>' +
       (orderLink ? '<a class="btn green" href="' + esc(orderLink) + '">ORDER ON WHATSAPP</a>' : "") +
       '<a class="btn plain" href="' + esc(storeLink) + '">VIEW FULL CATALOGUE</a>' +
