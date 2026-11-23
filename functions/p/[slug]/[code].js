@@ -26,8 +26,7 @@ async function rows(table, filters) {
   }
   const response = await fetch(endpoint.toString(), {
     headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: "Bearer " + SUPABASE_KEY
+      apikey: SUPABASE_KEY
     }
   });
   if (!response.ok) throw new Error("Catalogue data could not be loaded.");
