@@ -55,7 +55,7 @@ footer{text-align:center;color:var(--muted);padding:28px 10px;font-size:13px}
 <div id="businessTab" class="tab-pane">
 <div class="panel"><h2>Create a business catalogue</h2>
 <form id="businessForm">
-<div class="grid"><div><label>Business name *</label><input id="businessName" required placeholder="e.g. Queen Beauty Store"></div><div><label>Catalogue link name *</label><input id="businessSlug" required placeholder="e.g. queen-beauty"></div><div><label>WhatsApp number *</label><input id="businessWhatsapp" required placeholder="2348012345678"></div><div><label>Instagram link</label><input id="businessInstagram" type="url" placeholder="https://instagram.com/yourstore"></div></div>
+<div class="grid"><div><label>Business name *</label><input id="businessName" required placeholder="e.g. Queen Beauty Store"></div><div><label>Catalogue link name *</label><input id="businessSlug" required placeholder="e.g. queen-beauty"></div><div><label>WhatsApp number *</label><input id="businessWhatsapp" required placeholder="2348012345678"></div><div><label>Instagram link</label><input id="businessInstagram" type="url" placeholder="https://instagram.com/yourstore"></div><div><label>What would you like to create? *</label><select id="businessCatalogueType" required><option value="products">Product catalogue</option><option value="menu">Food menu / services menu</option></select><p class="tiny muted">Choose Menu for food vendors, restaurants, caterers and businesses listing services or packages.</p></div></div>
 <label>Business description</label><textarea id="businessDescription" placeholder="Introduce this business"></textarea><div class="grid"><div><label>Business location (optional)</label><input id="businessLocation" placeholder="City, area or address"></div><div><label>Delivery timeframe (optional)</label><input id="deliveryTime" placeholder="e.g. Same day, 2–3 working days"></div><div><label>Delivery fee / arrangements (optional)</label><input id="deliveryInfo" placeholder="e.g. Free delivery or customer pays delivery"></div><div><label>Payment terms (optional)</label><input id="paymentTerms" placeholder="e.g. Full payment before dispatch"></div></div>
 <div class="grid"><div class="file-box"><label>Business logo (optional)</label><input id="businessLogo" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div><div class="file-box"><label>Cover photo (optional)</label><input id="businessCover" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div></div>
 <div class="row" style="margin-top:14px"><button class="btn green" type="submit">Create catalogue</button></div></form><p id="businessMsg" class="msg"></p></div>
@@ -66,8 +66,8 @@ footer{text-align:center;color:var(--muted);padding:28px 10px;font-size:13px}
 <div class="panel"><h2>Add a product</h2><p class="muted tiny">Choose up to three photos from your phone gallery. The first photo is the main product image.</p>
 <form id="productForm">
 <label>Choose business *</label><select id="productBusiness" required><option value="">Choose a business</option></select>
-<div class="grid"><div><label>Product name *</label><input id="productName" required placeholder="e.g. Vitamin C Serum"></div><div><label>Product code *</label><input id="productCode" required placeholder="e.g. QZ01"></div><div><label>Price (numbers only) *</label><input id="productPrice" type="number" min="0" step="0.01" required placeholder="12000"></div></div>
-<label>Product category *</label><select id="productCategory" required><option value="">Choose category</option><option value="Clothing">Clothing</option><option value="Bags">Bags</option><option value="Beauty">Beauty</option><option value="Jewellery & Accessories">Jewellery & Accessories</option><option value="Electronics">Electronics</option><option value="Other">Other</option></select><label>Product description</label><textarea id="productDescription" placeholder="Optional product details"></textarea><label>Product availability (optional)</label><select id="productAvailability"><option value="">Not specified</option><option value="in_stock">In stock</option><option value="out_of_stock">Out of stock</option><option value="available_on_request">Available on request</option></select>
+<div class="grid"><div><label>Product / menu item name *</label><input id="productName" required placeholder="e.g. Vitamin C Serum or Jollof Rice"></div><div><label>Product / item code</label><input id="productCode" placeholder="Optional for menu items, e.g. FD01"></div><div><label>Price (numbers only) *</label><input id="productPrice" type="number" min="0" step="0.01" required placeholder="12000"></div></div>
+<label>Product / menu category *</label><select id="productCategory" required><option value="">Choose category</option><option value="Clothing">Clothing</option><option value="Bags">Bags</option><option value="Beauty">Beauty</option><option value="Jewellery & Accessories">Jewellery & Accessories</option><option value="Electronics">Electronics</option><option value="Food">Food</option><option value="Breakfast">Breakfast</option><option value="Main dishes">Main dishes</option><option value="Rice dishes">Rice dishes</option><option value="Soups & swallow">Soups &amp; swallow</option><option value="Snacks">Snacks</option><option value="Drinks">Drinks</option><option value="Desserts">Desserts</option><option value="Packages">Packages</option><option value="Services">Services</option><option value="Other">Other</option></select><label>Product description</label><textarea id="productDescription" placeholder="Optional product details"></textarea><label>Product availability (optional)</label><select id="productAvailability"><option value="">Not specified</option><option value="in_stock">In stock</option><option value="out_of_stock">Out of stock</option><option value="available_on_request">Available on request</option></select>
 <div class="grid"><div class="file-box"><label>Product photo 1 *</label><input id="image1" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required></div><div class="file-box"><label>Product photo 2 (optional)</label><input id="image2" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div><div class="file-box"><label>Product photo 3 (optional)</label><input id="image3" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div></div>
 <div class="row" style="margin-top:14px"><button class="btn green" type="submit">Upload photos and add product</button></div></form><p id="productMsg" class="msg"></p></div>
 <div class="panel"><div class="row between"><h2>Product manager</h2><button id="refreshProducts" class="btn plain" type="button">Refresh</button></div><div id="productManager" class="empty">Choose a business to view its products.</div></div>
@@ -90,8 +90,8 @@ footer{text-align:center;color:var(--muted);padding:28px 10px;font-size:13px}
 <div class="panel"><h2>Your assignments</h2><div id="workerJobs" class="empty">Loading your assignments…</div></div>
 <div class="panel"><h2>Add products to an assigned catalogue</h2><p class="muted tiny">You can add products only to businesses assigned to you by the GFS owner.</p>
 <form id="workerProductForm"><label>Assigned business *</label><select id="workerProductBusiness" required><option value="">Choose an assigned business</option></select>
-<div class="grid"><div><label>Product name *</label><input id="workerProductName" required></div><div><label>Product code *</label><input id="workerProductCode" required></div><div><label>Price *</label><input id="workerProductPrice" type="number" min="0" step="0.01" required></div></div>
-<label>Product category *</label><select id="workerProductCategory" required><option value="">Choose category</option><option value="Shoes">Shoes</option><option value="Clothing">Clothing</option><option value="Bags">Bags</option><option value="Beauty">Beauty</option><option value="Jewellery & Accessories">Jewellery & Accessories</option><option value="Electronics">Electronics</option><option value="Other">Other</option></select><label>Description</label><textarea id="workerProductDescription"></textarea><label>Product availability (optional)</label><select id="workerProductAvailability"><option value="">Not specified</option><option value="in_stock">In stock</option><option value="out_of_stock">Out of stock</option><option value="available_on_request">Available on request</option></select>
+<div class="grid"><div><label>Product / menu item name *</label><input id="workerProductName" required></div><div><label>Product / item code</label><input id="workerProductCode"></div><div><label>Price *</label><input id="workerProductPrice" type="number" min="0" step="0.01" required></div></div>
+<label>Product / menu category *</label><select id="workerProductCategory" required><option value="">Choose category</option><option value="Shoes">Shoes</option><option value="Clothing">Clothing</option><option value="Bags">Bags</option><option value="Beauty">Beauty</option><option value="Jewellery & Accessories">Jewellery & Accessories</option><option value="Electronics">Electronics</option><option value="Food">Food</option><option value="Breakfast">Breakfast</option><option value="Main dishes">Main dishes</option><option value="Rice dishes">Rice dishes</option><option value="Soups & swallow">Soups &amp; swallow</option><option value="Snacks">Snacks</option><option value="Drinks">Drinks</option><option value="Desserts">Desserts</option><option value="Packages">Packages</option><option value="Services">Services</option><option value="Other">Other</option></select><label>Description</label><textarea id="workerProductDescription"></textarea><label>Product availability (optional)</label><select id="workerProductAvailability"><option value="">Not specified</option><option value="in_stock">In stock</option><option value="out_of_stock">Out of stock</option><option value="available_on_request">Available on request</option></select>
 <div class="grid"><div class="file-box"><label>Product photo 1 *</label><input id="workerImage1" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required></div><div class="file-box"><label>Product photo 2</label><input id="workerImage2" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div><div class="file-box"><label>Product photo 3</label><input id="workerImage3" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></div></div>
 <div class="row" style="margin-top:14px"><button class="btn green" type="submit">Upload and add product</button></div></form><p id="workerProductMsg" class="msg"></p></div>
 </section>
@@ -99,7 +99,7 @@ footer{text-align:center;color:var(--muted);padding:28px 10px;font-size:13px}
 <section id="catalogue" class="hidden">
 <div id="catalogueHeader" class="panel"></div>
 <div id="productDetail" class="panel hidden"></div>
-<div id="catalogueListWrap"><div class="row between"><h2>Products</h2><span id="productCount" class="muted"></span></div><div id="catalogueProducts" class="product-grid"></div></div>
+<div id="catalogueListWrap"><div class="row between"><h2 id="catalogueItemsHeading">Products</h2><span id="productCount" class="muted"></span></div><div id="catalogueProducts" class="product-grid"></div></div>
 </section>
 </main>
 <footer>GFS Catalog Studio</footer>
@@ -182,7 +182,7 @@ $("businessForm").addEventListener("submit",async e=>{
   const logoFile=$("businessLogo").files[0],coverFile=$("businessCover").files[0];
   const logoUrl=logoFile?await uploadSingleImage(logoFile,"business-logos"):null;
   const coverUrl=coverFile?await uploadSingleImage(coverFile,"business-covers"):null;
-  const payload={owner_id:currentUser.id,name:$("businessName").value.trim(),slug:slugify($("businessSlug").value),whatsapp_number:$("businessWhatsapp").value.trim(),instagram_url:$("businessInstagram").value.trim()||null,description:$("businessDescription").value.trim()||null,logo_url:logoUrl,cover_url:coverUrl,business_location:$("businessLocation").value.trim()||null,delivery_time:$("deliveryTime").value.trim()||null,delivery_info:$("deliveryInfo").value.trim()||null,payment_terms:$("paymentTerms").value.trim()||null,is_published:true};
+  const payload={owner_id:currentUser.id,name:$("businessName").value.trim(),slug:slugify($("businessSlug").value),whatsapp_number:$("businessWhatsapp").value.trim(),catalogue_type:$("businessCatalogueType").value||"products",instagram_url:$("businessInstagram").value.trim()||null,description:$("businessDescription").value.trim()||null,logo_url:logoUrl,cover_url:coverUrl,business_location:$("businessLocation").value.trim()||null,delivery_time:$("deliveryTime").value.trim()||null,delivery_info:$("deliveryInfo").value.trim()||null,payment_terms:$("paymentTerms").value.trim()||null,is_published:true};
   const {error}=await db.from("businesses").insert(payload);if(error)throw error;
   msg("businessMsg","Catalogue created successfully.");e.target.reset();await loadBusinesses();
  }catch(err){msg("businessMsg",err.message||"Could not create catalogue.",true);}
@@ -213,8 +213,18 @@ async function uploadProductImages(businessId,inputs){
  }
  return urls;
 }
+function syncItemFormLabels(businessSelectId,nameId,codeId,categoryId){
+ const business=businesses.find(b=>b.id===$(businessSelectId).value)||workerJobs.find(j=>j.business_id===$(businessSelectId).value)?.businesses;
+ const isMenu=business?.catalogue_type==="menu";
+ const nameLabel=$(nameId).closest("div").querySelector("label");
+ if(nameLabel)nameLabel.textContent=isMenu?"Menu item / service name *":"Product name *";
+ const codeLabel=$(codeId).closest("div").querySelector("label");
+ if(codeLabel)codeLabel.textContent=isMenu?"Item code (optional)":"Product code (optional)";
+ const categoryLabel=$(categoryId).previousElementSibling;
+ if(categoryLabel)categoryLabel.textContent=isMenu?"Menu category *":"Product category *";
+}
 function productPayload(businessId,name,code,price,description,urls,availability,category){
- return {business_id:businessId,name:name.trim(),product_code:code.trim().toUpperCase(),price:Number(price),category:category||null,description:description.trim()||null,image_url:urls[0]||null,image_urls:urls,availability_status:availability||null,is_active:true};
+ return {business_id:businessId,name:name.trim(),product_code:code.trim()?code.trim().toUpperCase():null,price:Number(price),category:category||null,description:description.trim()||null,image_url:urls[0]||null,image_urls:urls,availability_status:availability||null,is_active:true};
 }
 $("productForm").addEventListener("submit",async e=>{
  e.preventDefault();msg("productMsg","Uploading product photos…");
@@ -233,11 +243,11 @@ async function loadProductManager(){
  if(error){$("productManager").textContent=error.message;return;}
  if(!data?.length){$("productManager").className="empty";$("productManager").textContent="No products in this catalogue yet.";return;}
  $("productManager").className="grid";
- $("productManager").innerHTML=data.map(p=>`<div class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}"><div class="card-body"><strong>${esc(p.name)}</strong><p class="tiny muted">${esc(p.category||"")}</p><div class="price">${money(p.price)}</div><div class="code">${esc(p.product_code||"")}</div><span class="status">${p.is_active?"ACTIVE":"HIDDEN"}</span><div class="row" style="margin-top:10px"><button class="btn plain" data-edit-product="${p.id}" type="button">Edit</button><button class="btn ${p.is_active?"pink":"green"}" data-active-product="${p.id}" data-state="${p.is_active}" type="button">${p.is_active?"Hide":"Show"}</button></div></div></div>`).join("");
+ $("productManager").innerHTML=data.map(p=>`<div class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}"><div class="card-body"><strong>${esc(p.name)}</strong><p class="tiny muted">${esc(p.category||"")}</p><div class="price">${money(p.price)}</div><div class="code">${p.product_code?"Product code: "+esc(p.product_code):""}</div><span class="status">${p.is_active?"ACTIVE":"HIDDEN"}</span><div class="row" style="margin-top:10px"><button class="btn plain" data-edit-product="${p.id}" type="button">Edit</button><button class="btn ${p.is_active?"pink":"green"}" data-active-product="${p.id}" data-state="${p.is_active}" type="button">${p.is_active?"Hide":"Show"}</button></div></div></div>`).join("");
  document.querySelectorAll("[data-edit-product]").forEach(b=>b.onclick=()=>editProduct(data.find(p=>p.id===b.dataset.editProduct)));
  document.querySelectorAll("[data-active-product]").forEach(b=>b.onclick=()=>toggleProduct(b.dataset.activeProduct,b.dataset.state==="true"));
 }
-$("productBusiness").addEventListener("change",loadProductManager);$("refreshProducts").onclick=loadProductManager;
+$("productBusiness").addEventListener("change",()=>{syncItemFormLabels("productBusiness","productName","productCode","productCategory");loadProductManager();});$("refreshProducts").onclick=loadProductManager;
 async function editProduct(p){
  if(!p)return;
  const name=prompt("Product name:",p.name);if(name===null)return;
@@ -291,8 +301,9 @@ async function loadJobs(){
 }
 $("refreshJobs").onclick=loadJobs;
 
+$("workerProductBusiness").addEventListener("change",()=>syncItemFormLabels("workerProductBusiness","workerProductName","workerProductCode","workerProductCategory"));
 async function loadWorkerDashboard(){
- const {data,error}=await db.from("catalogue_jobs").select("id,business_id,status,instructions,created_at,businesses(id,name,slug,whatsapp_number)").order("created_at",{ascending:false});
+ const {data,error}=await db.from("catalogue_jobs").select("id,business_id,status,instructions,created_at,businesses(id,name,slug,whatsapp_number,catalogue_type)").order("created_at",{ascending:false});
  if(error){$("workerJobs").textContent=error.message;return;}
  workerJobs=data||[];
  const active=workerJobs.filter(j=>["assigned","in_progress","changes_requested"].includes(j.status));
@@ -324,10 +335,10 @@ async function loadCatalogue(slug,productCode){
  hideMain();show("catalogue");
  const {data:b,error}=await db.from("businesses").select("*").eq("slug",slug).eq("is_published",true).maybeSingle();
  if(error||!b){$("catalogueHeader").innerHTML="<h1>Catalogue not found</h1><p class='muted'>This catalogue may be unpublished or the link may be incorrect.</p>";return;}
- $("catalogueHeader").innerHTML=`<div class="row">${b.logo_url?`<img class="logo" src="${esc(b.logo_url)}" alt="Business logo">`:""}<div><h1>${esc(b.name)}</h1><p class="muted">${esc(b.description||"Browse our products below.")}</p></div></div>${b.cover_url?`<img class="cover" src="${esc(b.cover_url)}" alt="">`:""}${b.instagram_url?`<p><a href="${esc(b.instagram_url)}" target="_blank" rel="noopener">Visit Instagram</a></p>`:""}${b.business_location?`<p><strong>Business location:</strong> ${esc(b.business_location)}</p>`:""}${b.delivery_time?`<p><strong>Delivery timeframe:</strong> ${esc(b.delivery_time)}</p>`:""}${b.delivery_info?`<p><strong>Delivery:</strong> ${esc(b.delivery_info)}</p>`:""}${b.payment_terms?`<p><strong>Payment:</strong> ${esc(b.payment_terms)}</p>`:""}`;
+ $("catalogueHeader").innerHTML=`<div class="row">${b.logo_url?`<img class="logo" src="${esc(b.logo_url)}" alt="Business logo">`:""}<div><h1>${esc(b.name)}</h1><p class="muted">${esc(b.description||(b.catalogue_type==="menu"?"Explore our menu below.":"Browse our products below."))}</p><span class="status">${b.catalogue_type==="menu"?"MENU":"PRODUCT CATALOGUE"}</span></div></div>${b.cover_url?`<img class="cover" src="${esc(b.cover_url)}" alt="">`:""}${b.instagram_url?`<p><a href="${esc(b.instagram_url)}" target="_blank" rel="noopener">Visit Instagram</a></p>`:""}${b.business_location?`<p><strong>Business location:</strong> ${esc(b.business_location)}</p>`:""}${b.delivery_time?`<p><strong>Delivery timeframe:</strong> ${esc(b.delivery_time)}</p>`:""}${b.delivery_info?`<p><strong>Delivery:</strong> ${esc(b.delivery_info)}</p>`:""}${b.payment_terms?`<p><strong>Payment:</strong> ${esc(b.payment_terms)}</p>`:""}`;
  const {data:items,error:pe}=await db.from("products").select("*").eq("business_id",b.id).eq("is_active",true).order("created_at",{ascending:false});
  if(pe){$("catalogueProducts").textContent=pe.message;return;}
- const products=items||[];$("productCount").textContent=products.length+" products";
+ const products=items||[];const isMenu=b.catalogue_type==="menu";$("catalogueItemsHeading").textContent=isMenu?"Menu":"Products";$("productCount").textContent=products.length+(isMenu?" menu items":" products");
  if(productCode){
   const p=products.find(x=>String(x.product_code).toLowerCase()===String(productCode).toLowerCase());
   if(!p){$("productDetail").innerHTML="<h2>Product not found</h2><p>This product may no longer be available.</p>";show("productDetail");hide("catalogueListWrap");return;}
@@ -336,16 +347,16 @@ async function loadCatalogue(slug,productCode){
  hide("productDetail");show("catalogueListWrap");
  if(!products.length){$("catalogueProducts").innerHTML='<div class="empty">Products will be added soon.</div>';return;}
  $("catalogueProducts").innerHTML=products.map(p=>{
-  const link=productUrl(slug,p.product_code||"");
+  const link=p.product_code?productUrl(slug,p.product_code):publicUrl(slug);
   const stockLabel={in_stock:"In stock",out_of_stock:"Out of stock",available_on_request:"Available on request"}[p.availability_status]||"";
   const businessDetails=[b.business_location&&"Business location: "+b.business_location,b.delivery_time&&"Delivery timeframe: "+b.delivery_time,b.delivery_info&&"Delivery: "+b.delivery_info,b.payment_terms&&"Payment: "+b.payment_terms].filter(Boolean).join("\n");
   const text=`Hello, I am interested in ordering this product.\nBusiness: ${b.name}\nProduct: ${p.name}\nCode: ${p.product_code||""}\nPrice: ${money(p.price)}${stockLabel?"\nAvailability: "+stockLabel:""}${businessDetails?"\n"+businessDetails:""}\n${link}`;
-  return `<article class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}" loading="lazy"><div class="card-body"><strong>${esc(p.name)}</strong><p class="tiny muted">${esc(p.category||"")}</p><div class="price">${money(p.price)}</div><div class="code">Product code: ${esc(p.product_code||"")}</div>${p.availability_status?`<p><span class="status">${({in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE ON REQUEST"})[p.availability_status]||""}</span></p>`:""}<a class="secondary-link" href="${esc(link)}">View product</a><a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER ON WHATSAPP</a></div></article>`;
+  return `<article class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}" loading="lazy"><div class="card-body"><strong>${esc(p.name)}</strong><p class="tiny muted">${esc(p.category||"")}</p><div class="price">${money(p.price)}</div><div class="code">${p.product_code?"Item code: "+esc(p.product_code):""}</div>${p.availability_status?`<p><span class="status">${({in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE ON REQUEST"})[p.availability_status]||""}</span></p>`:""}<a class="secondary-link" href="${esc(link)}">View product</a><a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER ON WHATSAPP</a></div></article>`;
  }).join("");
 }
 function renderProductDetail(b,p,slug){
  const images=Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls:(p.image_url?[p.image_url]:[]);
- const link=productUrl(slug,p.product_code||"");
+ const link=p.product_code?productUrl(slug,p.product_code):publicUrl(slug);
  const stockLabel={in_stock:"In stock",out_of_stock:"Out of stock",available_on_request:"Available on request"}[p.availability_status]||"";
  const businessDetails=[b.business_location&&"Business location: "+b.business_location,b.delivery_time&&"Delivery timeframe: "+b.delivery_time,b.delivery_info&&"Delivery: "+b.delivery_info,b.payment_terms&&"Payment: "+b.payment_terms].filter(Boolean).join("\n");
  const text=`Hello, I am interested in ordering this product.\nBusiness: ${b.name}\nProduct: ${p.name}\nCode: ${p.product_code||""}\nPrice: ${money(p.price)}${stockLabel?"\nAvailability: "+stockLabel:""}${businessDetails?"\n"+businessDetails:""}\n${link}`;
