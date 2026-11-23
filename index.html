@@ -25,8 +25,8 @@ textarea{min-height:75px;resize:vertical}
 .msg{margin:8px 0;min-height:20px;font-size:14px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font-weight:700}.tab.active{background:var(--pink);border-color:#efbad5}
 .card{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}.card-body{padding:13px}
 .product-img{width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;object-position:center;background:#fff;display:block;padding:0;cursor:zoom-in}
-.photo-viewer{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.96);display:flex;align-items:center;justify-content:center;padding:16px}
-.photo-viewer.hidden{display:none!important}.photo-viewer img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.photo-viewer{position:fixed;inset:0;z-index:1000;background:#000;display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden;touch-action:pan-y}
+.photo-viewer.hidden{display:none!important}.photo-viewer img{display:block;width:100vw;height:100vh;height:100dvh;max-width:100%;max-height:100%;object-fit:contain;object-position:center;margin:auto;touch-action:pan-y}
 .photo-viewer button{position:absolute;border:0;border-radius:999px;background:rgba(255,255,255,.16);color:#fff;font-size:24px;width:46px;height:46px}
 .photo-viewer .close-viewer{top:14px;right:14px}.photo-viewer .prev-viewer{left:12px;top:50%;transform:translateY(-50%)}.photo-viewer .next-viewer{right:12px;top:50%;transform:translateY(-50%)}
 .photo-viewer .viewer-count{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:#fff;background:rgba(0,0,0,.45);padding:6px 12px;border-radius:20px;font-size:13px}
@@ -408,6 +408,9 @@ $("closeViewer").onclick=closePhotoViewer;
 $("photoViewer").addEventListener("click",e=>{if(e.target.id==="photoViewer")closePhotoViewer();});
 $("prevViewer").onclick=()=>{viewerIndex=(viewerIndex-1+viewerImages.length)%viewerImages.length;showViewerImage();};
 $("nextViewer").onclick=()=>{viewerIndex=(viewerIndex+1)%viewerImages.length;showViewerImage();};
+let viewerTouchStartX=0,viewerTouchStartY=0;
+$("photoViewer").addEventListener("touchstart",e=>{if(e.touches.length===1){viewerTouchStartX=e.touches[0].clientX;viewerTouchStartY=e.touches[0].clientY;}},{passive:true});
+$("photoViewer").addEventListener("touchend",e=>{if(!viewerTouchStartX||!e.changedTouches.length)return;const dx=e.changedTouches[0].clientX-viewerTouchStartX,dy=e.changedTouches[0].clientY-viewerTouchStartY;viewerTouchStartX=0;viewerTouchStartY=0;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25&&viewerImages.length>1){viewerIndex=(viewerIndex+(dx<0?1:-1)+viewerImages.length)%viewerImages.length;showViewerImage();}},{passive:true});
 document.addEventListener("keydown",e=>{
  if($("photoViewer").classList.contains("hidden"))return;
  if(e.key==="Escape")closePhotoViewer();
