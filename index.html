@@ -24,14 +24,14 @@ textarea{min-height:75px;resize:vertical}
 .notice{padding:12px;border-radius:9px;background:#f8fafc;border:1px solid var(--line);margin:12px 0}
 .msg{margin:8px 0;min-height:20px;font-size:14px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font-weight:700}.tab.active{background:var(--pink);border-color:#efbad5}
 .card{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#fff}.card-body{padding:13px}
-.product-img{width:100%;height:205px;object-fit:cover;background:#f3f4f6;display:block}
+.product-img{width:100%;height:205px;object-fit:contain;object-position:center;background:#f3f4f6;display:block;padding:6px}
 .product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
 .price{font-weight:900;font-size:19px}.code{font-size:13px;color:var(--muted);margin:4px 0 10px}
 .order{display:block;text-align:center;text-decoration:none;background:var(--green);color:#fff;padding:11px;border-radius:8px;font-weight:800;margin-top:8px}
 .secondary-link{display:block;text-align:center;padding:9px;border:1px solid var(--line);border-radius:8px;text-decoration:none;margin-top:8px;color:var(--ink);font-weight:700}
-.logo{max-width:85px;max-height:70px;object-fit:contain}.cover{width:100%;max-height:210px;object-fit:cover;border-radius:12px;margin-top:12px}
+.logo{max-width:85px;max-height:70px;object-fit:contain}.cover{width:100%;max-height: none;height:auto;object-fit:contain;object-position:center;border-radius:12px;margin-top:12px;display:block}
 .empty{padding:26px;text-align:center;border:1px dashed #cbd5e1;border-radius:12px;color:var(--muted)}
-.thumb-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.thumb-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.thumb{width:72px;height:72px;object-fit:contain;object-position:center;background:#f3f4f6;border-radius:8px;border:1px solid var(--line)}
 .file-box{border:1px dashed #cbd5e1;padding:10px;border-radius:10px;background:#fcfcfd}
 .status{display:inline-block;padding:4px 9px;border-radius:999px;background:#f3f4f6;font-size:12px;font-weight:800}
 footer{text-align:center;color:var(--muted);padding:28px 10px;font-size:13px}
