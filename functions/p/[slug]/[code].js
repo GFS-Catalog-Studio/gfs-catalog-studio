@@ -98,7 +98,7 @@ export async function onRequestGet(context) {
       'main{max-width:760px;margin:28px auto;padding:0 16px}.brand{font-weight:900;color:#128c4a;letter-spacing:.4px}' +
       '.box{border:1px solid #e5e7eb;border-radius:16px;padding:18px;margin-top:18px}' +
       '.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}' +
-      '.gallery img{width:100%;height:230px;object-fit:cover;border-radius:10px;background:#f3f4f6}' +
+      '.gallery img{width:100%;height:230px;object-fit:contain;object-position:center;border-radius:10px;background:#f3f4f6;padding:6px}' +
       '.price{font-size:24px;font-weight:900;margin:8px 0}.muted,.code{color:#667085}.code{font-size:13px}' +
       '.btn{display:block;text-align:center;text-decoration:none;padding:13px;border-radius:9px;font-weight:800;margin-top:10px}' +
       '.green{background:#128c4a;color:white}.plain{border:1px solid #e5e7eb;color:#111827}' +
