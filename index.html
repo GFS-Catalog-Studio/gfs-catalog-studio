@@ -443,13 +443,13 @@ function finishViewerPointer(e){
  const start=viewerSwipeStart,wasSingle=viewerPointers.size===1;
  viewerPointers.delete(e.pointerId);
  if(viewerPointers.size<2)viewerPinchStart=0;
- if(wasSingle&&start&&viewerScale===1){
+ if(wasSingle&&start){
   const dx=e.clientX-start.x,dy=e.clientY-start.y;
-  if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25&&viewerImages.length>1){
+  if(viewerScale===1&&Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25&&viewerImages.length>1){
    viewerIndex=(viewerIndex+(dx<0?1:-1)+viewerImages.length)%viewerImages.length;showViewerImage();viewerLastTap=0;
   }else if(Math.abs(dx)<12&&Math.abs(dy)<12){
    const now=Date.now();
-   if(now-viewerLastTap<320){viewerScale=2.5;viewerX=0;viewerY=0;applyViewerZoom();viewerLastTap=0;}
+   if(now-viewerLastTap<320){viewerScale=viewerScale>1?1:2.5;if(viewerScale===1){viewerX=0;viewerY=0;}applyViewerZoom();viewerLastTap=0;}
    else viewerLastTap=now;
   }
  }
