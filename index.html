@@ -253,15 +253,15 @@ function syncItemFormLabels(businessSelectId,nameId,codeId,categoryId){
  const categoryLabel=$(categoryId).previousElementSibling;
  if(categoryLabel)categoryLabel.textContent=isMenu?"Menu category *":"Product category *";
 }
-function productPayload(businessId,name,code,price,description,urls,availability,category){
- return {business_id:businessId,name:name.trim(),product_code:code.trim()?code.trim().toUpperCase():null,price:Number(price),category:category||null,description:description.trim()||null,image_url:urls[0]||null,image_urls:urls,availability_status:availability||null,is_active:true};
+function productPayload(businessId,name,code,price,description,urls,availability,category,sizes){
+ return {business_id:businessId,name:name.trim(),product_code:code.trim()?code.trim().toUpperCase():null,price:price.trim()===""?null:Number(price),sizes:sizes.trim()||null,category:category||null,description:description.trim()||null,image_url:urls[0]||null,image_urls:urls,availability_status:availability||null,is_active:true};
 }
 $("productForm").addEventListener("submit",async e=>{
  e.preventDefault();msg("productMsg","Uploading product photos…");
  try{
   const bid=$("productBusiness").value;
   const urls=await uploadProductImages(bid,["image1","image2","image3"]);
-  const payload=productPayload(bid,$("productName").value,$("productCode").value,$("productPrice").value,$("productDescription").value,urls,$("productAvailability").value,$("productCategory").value);
+  const payload=productPayload(bid,$("productName").value,$("productCode").value,$("productPrice").value,$("productDescription").value,urls,$("productAvailability").value,$("productCategory").value,$("productSizes").value);
   const {error}=await db.from("products").insert(payload);if(error)throw error;
   msg("productMsg","Product and photos added successfully.");e.target.reset();await loadProductManager();
  }catch(err){msg("productMsg",err.message||"Product upload failed.",true);}
@@ -273,7 +273,7 @@ async function loadProductManager(){
  if(error){$("productManager").textContent=error.message;return;}
  if(!data?.length){$("productManager").className="empty";$("productManager").textContent="No products in this catalogue yet.";return;}
  $("productManager").className="grid";
- $("productManager").innerHTML=data.map(p=>`<div class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}"><div class="card-body"><strong>${esc(p.name)}</strong><p class="tiny muted">${esc(p.category||"")}</p><div class="price">${money(p.price)}</div><div class="code">${p.product_code?"Product code: "+esc(p.product_code):""}</div><span class="status">${p.is_active?"ACTIVE":"HIDDEN"}</span><div class="row" style="margin-top:10px"><button class="btn plain" data-edit-product="${p.id}" type="button">Edit</button><button class="btn ${p.is_active?"pink":"green"}" data-active-product="${p.id}" data-state="${p.is_active}" type="button">${p.is_active?"Hide":"Show"}</button></div></div></div>`).join("");
+ $("productManager").innerHTML=data.map(p=>`<div class="card"><img class="product-img" src="${esc(p.image_url||"")}" alt="${esc(p.name)}"><div class="card-body"><strong>${esc(p.name)}</strong><p class="tiny muted">${esc(p.category||"")}</p>${p.price!==null&&p.price!==undefined?`<div class="price">${money(p.price)}</div>`:""}${p.sizes?`<p class="tiny">Sizes: ${esc(p.sizes)}</p>`:""}<div class="code">${p.product_code?"Product code: "+esc(p.product_code):""}</div><span class="status">${p.is_active?"ACTIVE":"HIDDEN"}</span><div class="row" style="margin-top:10px"><button class="btn plain" data-edit-product="${p.id}" type="button">Edit</button><button class="btn ${p.is_active?"pink":"green"}" data-active-product="${p.id}" data-state="${p.is_active}" type="button">${p.is_active?"Hide":"Show"}</button></div></div></div>`).join("");
  document.querySelectorAll("[data-edit-product]").forEach(b=>b.onclick=()=>editProduct(data.find(p=>p.id===b.dataset.editProduct)));
  document.querySelectorAll("[data-active-product]").forEach(b=>b.onclick=()=>toggleProduct(b.dataset.activeProduct,b.dataset.state==="true"));
 }
@@ -282,7 +282,7 @@ let editingProduct=null;
 function editProduct(p){
  if(!p)return;editingProduct=p;
  $("editName").value=p.name||"";$("editCode").value=p.product_code||"";
- $("editPrice").value=p.price??"";$("editCategory").value=p.category||"";
+ $("editPrice").value=p.price??"";$("editSizes").value=p.sizes||"";$("editCategory").value=p.category||"";
  $("editDescription").value=p.description||"";$("editAvailability").value=p.availability_status||"";
  $("editProductImages").value="";msg("editProductMsg","");
  show("editOverlay");
@@ -309,7 +309,7 @@ $("editProductForm").addEventListener("submit",async e=>{
    }
   }
   const code=$("editCode").value.trim().toUpperCase();
-  const payload={name:$("editName").value.trim(),product_code:code||null,price:Number($("editPrice").value),category:$("editCategory").value||null,description:$("editDescription").value.trim()||null,availability_status:$("editAvailability").value||null,image_url:imageUrls[0]||null,image_urls:imageUrls,updated_at:new Date().toISOString()};
+  const payload={name:$("editName").value.trim(),product_code:code||null,price:$("editPrice").value.trim()===""?null:Number($("editPrice").value),sizes:$("editSizes").value.trim()||null,category:$("editCategory").value||null,description:$("editDescription").value.trim()||null,availability_status:$("editAvailability").value||null,image_url:imageUrls[0]||null,image_urls:imageUrls,updated_at:new Date().toISOString()};
   const {error}=await db.from("products").update(payload).eq("id",editingProduct.id);
   if(error)throw error;
   hide("editOverlay");editingProduct=null;await loadProductManager();
@@ -384,7 +384,7 @@ $("workerProductForm").addEventListener("submit",async e=>{
  try{
   const bid=$("workerProductBusiness").value;
   const urls=await uploadProductImages(bid,["workerImage1","workerImage2","workerImage3"]);
-  const payload=productPayload(bid,$("workerProductName").value,$("workerProductCode").value,$("workerProductPrice").value,$("workerProductDescription").value,urls,$("workerProductAvailability").value,$("workerProductCategory").value);
+  const payload=productPayload(bid,$("workerProductName").value,$("workerProductCode").value,$("workerProductPrice").value,$("workerProductDescription").value,urls,$("workerProductAvailability").value,$("workerProductCategory").value,$("workerProductSizes").value);
   const {error}=await db.from("products").insert(payload);if(error)throw error;
   msg("workerProductMsg","Product added successfully.");e.target.reset();
  }catch(err){msg("workerProductMsg",err.message||"Product upload failed.",true);}
@@ -475,33 +475,43 @@ async function loadCatalogue(slug,productCode){
  hideMain();show("catalogue");
  const {data:b,error}=await db.from("businesses").select("*").eq("slug",slug).eq("is_published",true).maybeSingle();
  if(error||!b){$("catalogueHeader").innerHTML="<h1>Catalogue not found</h1><p class='muted'>This catalogue may be unpublished or the link may be incorrect.</p>";return;}
- $("catalogueHeader").innerHTML=`<div class="row">${b.logo_url?`<img class="logo" src="${esc(b.logo_url)}" alt="Business logo">`:""}<div><h1>${esc(b.name)}</h1><p class="muted">${esc(b.description||(b.catalogue_type==="menu"?"Explore our menu below.":"Browse our products below."))}</p><span class="status">${b.catalogue_type==="menu"?"MENU":"PRODUCT CATALOGUE"}</span></div></div>${b.cover_url?`<img class="cover" src="${esc(b.cover_url)}" alt="">`:""}${b.instagram_url?`<p><a href="${esc(b.instagram_url)}" target="_blank" rel="noopener">Visit Instagram</a></p>`:""}${b.business_location?`<p><strong>Business location:</strong> ${esc(b.business_location)}</p>`:""}${b.delivery_time?`<p><strong>Delivery timeframe:</strong> ${esc(b.delivery_time)}</p>`:""}${b.delivery_info?`<p><strong>Delivery:</strong> ${esc(b.delivery_info)}</p>`:""}${b.payment_terms?`<p><strong>Payment:</strong> ${esc(b.payment_terms)}</p>`:""}`;
+ document.body.classList.add("public-catalogue");
+ $("catalogueHeader").innerHTML=`${b.cover_url?`<img class="catalogue-hero" src="${esc(b.cover_url)}" alt="${esc(b.name)} cover">`:""}<div class="catalogue-identity">${b.logo_url?`<img class="logo" src="${esc(b.logo_url)}" alt="${esc(b.name)} logo">`:""}<div><h1>${esc(b.name)}</h1><span class="tiny muted">${b.catalogue_type==="menu"?"MENU":"PRODUCT CATALOGUE"}</span></div></div><p class="catalogue-description">${esc(b.description||(b.catalogue_type==="menu"?"Explore our menu below.":"Browse our products below."))}</p>${b.instagram_url?`<p style="padding:0 16px 10px;margin:0"><a href="${esc(b.instagram_url)}" target="_blank" rel="noopener">Visit Instagram</a></p>`:""}${b.business_location?`<p style="padding:0 16px;margin:0 0 5px"><strong>Business location:</strong> ${esc(b.business_location)}</p>`:""}${b.delivery_time?`<p style="padding:0 16px;margin:0 0 5px"><strong>Delivery timeframe:</strong> ${esc(b.delivery_time)}</p>`:""}${b.delivery_info?`<p style="padding:0 16px;margin:0 0 5px"><strong>Delivery:</strong> ${esc(b.delivery_info)}</p>`:""}${b.payment_terms?`<p style="padding:0 16px;margin:0 0 12px"><strong>Payment:</strong> ${esc(b.payment_terms)}</p>`:""}`;
  if(productCode){
-  const {data:p,error:productError}=await db.from("products").select("*").eq("business_id",b.id).eq("is_active",true).ilike("product_code",productCode).maybeSingle();
+  const query=db.from("products").select("*").eq("business_id",b.id).eq("is_active",true);
+  const {data:p,error:productError}=productCode.startsWith("id:")?await query.eq("id",productCode.slice(3)).maybeSingle():await query.ilike("product_code",productCode).maybeSingle();
   if(productError){$("productDetail").innerHTML="<h2>Could not load product</h2><p class='muted'>Please try again.</p>";show("productDetail");hide("catalogueListWrap");return;}
   if(!p){$("productDetail").innerHTML="<h2>Product not found</h2><p>This product may no longer be available.</p>";show("productDetail");hide("catalogueListWrap");return;}
   renderProductDetail(b,p,slug);show("productDetail");hide("catalogueListWrap");return;
  }
  const {data:items,error:pe}=await db.from("products").select("*").eq("business_id",b.id).eq("is_active",true).order("created_at",{ascending:false});
  if(pe){$("catalogueProducts").textContent=pe.message;return;}
- const products=items||[];const isMenu=b.catalogue_type==="menu";$("catalogueItemsHeading").textContent=isMenu?"Menu":"Products";$("productCount").textContent=products.length+(isMenu?" menu items":" products");
- hide("productDetail");show("catalogueListWrap");
- if(!products.length){$("catalogueProducts").innerHTML='<div class="empty">Products will be added soon.</div>';return;}
- $("catalogueProducts").innerHTML=products.map(p=>{
-  const link=p.product_code?productUrl(slug,p.product_code):publicUrl(slug);
-  const stockLabel={in_stock:"In stock",out_of_stock:"Out of stock",available_on_request:"Available on request"}[p.availability_status]||"";
-  const businessDetails=[b.business_location&&"Business location: "+b.business_location,b.delivery_time&&"Delivery timeframe: "+b.delivery_time,b.delivery_info&&"Delivery: "+b.delivery_info,b.payment_terms&&"Payment: "+b.payment_terms].filter(Boolean).join("\n");
-  const text=`Hello, I am interested in ordering this product.\nBusiness: ${b.name}\nProduct: ${p.name}\nCode: ${p.product_code||""}\nPrice: ${money(p.price)}${stockLabel?"\nAvailability: "+stockLabel:""}${businessDetails?"\n"+businessDetails:""}\n${link}`;
-  return `<article class="card"><img class="product-img" data-open-image data-images="${esc(JSON.stringify(Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls:(p.image_url?[p.image_url]:[])))}" src="${esc((Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls[0]:p.image_url)||"")}" alt="${esc(p.name)}" loading="lazy"><div class="card-body"><strong>${esc(p.name)}</strong><p class="tiny muted">${esc(p.category||"")}</p><div class="price">${money(p.price)}</div><div class="code">${p.product_code?"Item code: "+esc(p.product_code):""}</div>${p.availability_status?`<p><span class="status">${({in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE ON REQUEST"})[p.availability_status]||""}</span></p>`:""}${p.product_code?`<a class="secondary-link" href="${esc(link)}">View product</a>`:""}<a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER ON WHATSAPP</a></div></article>`;
- }).join("");
+ const products=items||[];const isMenu=b.catalogue_type==="menu";$("catalogueItemsHeading").textContent=isMenu?"Menu":"Products";$("productCount").textContent=products.length+(isMenu?" items":" products");
+ hide("productDetail");show("catalogueListWrap");catalogueProducts=products;catalogueBusiness=b;catalogueSlug=slug;cataloguePage=0;renderCataloguePage();
 }
+function renderCataloguePage(){
+ const pageSize=4,totalPages=Math.max(1,Math.ceil(catalogueProducts.length/pageSize));
+ const start=cataloguePage*pageSize,items=catalogueProducts.slice(start,start+pageSize),b=catalogueBusiness,slug=catalogueSlug;
+ if(!catalogueProducts.length){$("catalogueProducts").innerHTML='<div class="empty catalogue-empty">Products will be added soon.</div>';hide("cataloguePagination");return;}
+ $("catalogueProducts").innerHTML=items.map(p=>{
+  const images=Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls:(p.image_url?[p.image_url]:[]);
+  const link=publicUrl(slug)+"&product="+encodeURIComponent(p.product_code||("id:"+p.id));
+  const stockLabel={in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE"}[p.availability_status]||"";
+  const businessDetails=[b.business_location&&"Business location: "+b.business_location,b.delivery_time&&"Delivery timeframe: "+b.delivery_time,b.delivery_info&&"Delivery: "+b.delivery_info,b.payment_terms&&"Payment: "+b.payment_terms].filter(Boolean).join("\\n");
+  const text=`Hello, I am interested in ordering this product.\\nBusiness: ${b.name}\\nProduct: ${p.name}\\nCode: ${p.product_code||""}${p.price!==null&&p.price!==undefined?"\\nPrice: "+money(p.price):""}${p.sizes?"\\nSizes: "+p.sizes:""}${stockLabel?"\\nAvailability: "+stockLabel:""}${businessDetails?"\\n"+businessDetails:""}\\n${link}`;
+  return `<article class="card"><img class="product-img" data-open-image data-images="${esc(JSON.stringify(images))}" src="${esc(images[0]||"")}" alt="${esc(p.name)}" loading="lazy"><div class="card-body"><strong class="product-name" title="${esc(p.name)}">${esc(p.name)}</strong><div class="product-meta">${p.price!==null&&p.price!==undefined?`<span class="price">${money(p.price)}</span>`:""}${p.sizes?`<span class="size-pill">Sizes: ${esc(p.sizes)}</span>`:""}</div>${stockLabel?`<div class="product-meta"><span class="stock-pill">${stockLabel}</span></div>`:""}${p.product_code?`<div class="code">Code: ${esc(p.product_code)}</div>`:""}<div class="product-actions"><a class="view-action" href="${esc(link)}">View</a><a class="order-action" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">WhatsApp</a></div></div></article>`;
+ }).join("");
+ if(totalPages>1){show("cataloguePagination");$("cataloguePageLabel").textContent=`Page ${cataloguePage+1} of ${totalPages}`;$("cataloguePrev").disabled=cataloguePage===0;$("catalogueNext").disabled=cataloguePage===totalPages-1;}else hide("cataloguePagination");
+}
+$("cataloguePrev").onclick=()=>{if(cataloguePage>0){cataloguePage--;renderCataloguePage();window.scrollTo({top:$("catalogueListWrap").offsetTop,behavior:"smooth"});}};
+$("catalogueNext").onclick=()=>{if((cataloguePage+1)*4<catalogueProducts.length){cataloguePage++;renderCataloguePage();window.scrollTo({top:$("catalogueListWrap").offsetTop,behavior:"smooth"});}};
 function renderProductDetail(b,p,slug){
  const images=Array.isArray(p.image_urls)&&p.image_urls.length?p.image_urls:(p.image_url?[p.image_url]:[]);
  const link=p.product_code?productUrl(slug,p.product_code):publicUrl(slug);
  const stockLabel={in_stock:"In stock",out_of_stock:"Out of stock",available_on_request:"Available on request"}[p.availability_status]||"";
  const businessDetails=[b.business_location&&"Business location: "+b.business_location,b.delivery_time&&"Delivery timeframe: "+b.delivery_time,b.delivery_info&&"Delivery: "+b.delivery_info,b.payment_terms&&"Payment: "+b.payment_terms].filter(Boolean).join("\n");
- const text=`Hello, I am interested in ordering this product.\nBusiness: ${b.name}\nProduct: ${p.name}\nCode: ${p.product_code||""}\nPrice: ${money(p.price)}${stockLabel?"\nAvailability: "+stockLabel:""}${businessDetails?"\n"+businessDetails:""}\n${link}`;
- $("productDetail").innerHTML=`<p><a href="${esc(publicUrl(slug))}">← Back to all products</a></p><div class="grid"><div>${images.map((src,i)=>`<img class="product-img" data-open-image data-images="${esc(JSON.stringify(images))}" data-image-index="${i}" style="margin-bottom:8px;border-radius:10px" src="${esc(src)}" alt="${esc(p.name)} photo ${i+1}">`).join("")}</div><div><h1>${esc(p.name)}</h1><div class="price">${money(p.price)}</div><p class="code">Product code: ${esc(p.product_code||"")}</p>${p.availability_status?`<p><span class="status">${({in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE ON REQUEST"})[p.availability_status]||""}</span></p>`:""}<p>${esc(p.description||"")}</p>${b.business_location?`<p><strong>Business location:</strong> ${esc(b.business_location)}</p>`:""}${b.delivery_time?`<p><strong>Delivery timeframe:</strong> ${esc(b.delivery_time)}</p>`:""}${b.delivery_info?`<p><strong>Delivery:</strong> ${esc(b.delivery_info)}</p>`:""}${b.payment_terms?`<p><strong>Payment:</strong> ${esc(b.payment_terms)}</p>`:""}<a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER THIS PRODUCT ON WHATSAPP</a><button id="shareProduct" class="btn plain" style="width:100%;margin-top:9px" type="button">Copy product link</button></div></div>`;
+ const text=`Hello, I am interested in ordering this product.\nBusiness: ${b.name}\nProduct: ${p.name}\nCode: ${p.product_code||""}${p.price!==null&&p.price!==undefined?"\nPrice: "+money(p.price):""}${p.sizes?"\nSizes: "+p.sizes:""}${stockLabel?"\nAvailability: "+stockLabel:""}${businessDetails?"\n"+businessDetails:""}\n${link}`;
+ $("productDetail").innerHTML=`<p><a href="${esc(publicUrl(slug))}">← Back to all products</a></p><div class="grid"><div>${images.map((src,i)=>`<img class="product-img" data-open-image data-images="${esc(JSON.stringify(images))}" data-image-index="${i}" style="margin-bottom:8px;border-radius:10px" src="${esc(src)}" alt="${esc(p.name)} photo ${i+1}">`).join("")}</div><div><h1>${esc(p.name)}</h1>${p.price!==null&&p.price!==undefined?`<div class="price">${money(p.price)}</div>`:""}${p.sizes?`<p><strong>Sizes:</strong> ${esc(p.sizes)}</p>`:""}<p class="code">Product code: ${esc(p.product_code||"")}</p>${p.availability_status?`<p><span class="status">${({in_stock:"IN STOCK",out_of_stock:"OUT OF STOCK",available_on_request:"AVAILABLE ON REQUEST"})[p.availability_status]||""}</span></p>`:""}<p>${esc(p.description||"")}</p>${b.business_location?`<p><strong>Business location:</strong> ${esc(b.business_location)}</p>`:""}${b.delivery_time?`<p><strong>Delivery timeframe:</strong> ${esc(b.delivery_time)}</p>`:""}${b.delivery_info?`<p><strong>Delivery:</strong> ${esc(b.delivery_info)}</p>`:""}${b.payment_terms?`<p><strong>Payment:</strong> ${esc(b.payment_terms)}</p>`:""}<a class="order" href="${esc(waUrl(b.whatsapp_number,text))}" target="_blank" rel="noopener">ORDER THIS PRODUCT ON WHATSAPP</a><button id="shareProduct" class="btn plain" style="width:100%;margin-top:9px" type="button">Copy product link</button></div></div>`;
  $("shareProduct").onclick=()=>copyText(link,$("shareProduct"));
 }
 start();
